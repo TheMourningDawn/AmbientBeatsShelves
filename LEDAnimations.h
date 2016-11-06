@@ -47,6 +47,11 @@ class LEDAnimations
     int clampSensitivity(int sensitivity);
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
+    void setBottomShelf(int index, CHSV color);
+    void setMiddleShelf(int index, CHSV color);
+    void setTopShelf(int index, CHSV color);
+    void waterfallBottomShelf(int frequencyValue, int frequencyThreshold);
+
     void clearAllLeds();
     void rainbow();
     void fuckinShit();
