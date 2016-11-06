@@ -19,14 +19,17 @@ FASTLED_USING_NAMESPACE;
 
 class LEDAnimations
 {
-private:
+  private:
     SpectrumEqualizer *equalizer;
-public:
+  public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    CRGB* bottomShelfLeds;
-    CRGB* middleShelfLeds;
-    CRGB* topShelfLeds;
+    // CRGB *bottomShelfLeds[LEDS_PER_SHELF];
+    // CRGB *middleShelfLeds[LEDS_PER_SHELF];
+    // CRGB *topShelfLeds[LEDS_PER_SHELF];
+    CRGB *bottomShelfLeds;
+    CRGB *middleShelfLeds;
+    CRGB *topShelfLeds;
     uint8_t currentPattern;
     uint8_t numberOfPatterns;
     uint8_t hueCounter;
@@ -45,6 +48,7 @@ public:
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
     void rainbow();
+    void fuckinShit();
     void confetti(int frequencyValue);
     void sinelon(int frequencyValue);
     void bpm();
@@ -53,6 +57,8 @@ public:
     void waterfallCascading();
     void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold);
     void waterfallBorder(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorderControllerOnly();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
