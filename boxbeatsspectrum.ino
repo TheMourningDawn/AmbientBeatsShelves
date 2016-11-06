@@ -51,7 +51,6 @@ void setup() {
     //  for(int i=0;i<LEDS_PER_SHELF;i++) {
     //     animations->bottomShelfLeds[i] = animations->allShelves[i];
     // }
-
     for(int j=0;j<NUM_BORDER_LEDS;j++) {
       animations->borderLeds[j] = 0;
     }

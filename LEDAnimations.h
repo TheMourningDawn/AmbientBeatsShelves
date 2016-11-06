@@ -7,7 +7,7 @@
 
 FASTLED_USING_NAMESPACE;
 
-#define NUM_SHELF_LEDS 60
+#define NUM_SHELF_LEDS 59
 #define LEDS_PER_SHELF 20
 #define NUM_BORDER_LEDS 147
 #define NUM_TOTAL_LEDS NUM_BORDER_LEDS + NUM_SHELF_LEDS
@@ -47,6 +47,7 @@ class LEDAnimations
     int clampSensitivity(int sensitivity);
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
+    void clearAllLeds();
     void rainbow();
     void fuckinShit();
     void confetti(int frequencyValue);

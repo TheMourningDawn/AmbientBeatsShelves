@@ -35,8 +35,25 @@ LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
 }
 
 int LEDAnimations::runCurrentAnimation() {
-
     equalizer->readAudioFrequencies();
+
+    // switch (currentPattern) {
+    //   case 0:
+    //     waterfall();
+    //     break;
+    //   case 1:
+    //     waterfallBorderControllerOnly();
+    //     break;
+    //   case 2:
+    //     rainbow();
+    //     break;
+    //   case 3:
+    //     juggle(equalizer->frequenciesLeft[4]);
+    //     break;
+    //   default:
+    //     clearAllLeds();
+    //     break;
+    // }
 
     if(currentPattern == 0) {
         waterfall();
@@ -68,28 +85,6 @@ int LEDAnimations::runCurrentAnimation() {
         }
     }
 }
-
-// a colored dot sweeping back and forth, with fading trails
-void LEDAnimations::fuckinShit() {
-    for(int i=0;i<39;i++) {
-        allShelves[i] = CHSV(20, 200, 255);
-    }
-    FastLED.show();
-    delay(1000);
-    for(int i=0;i<NUM_SHELF_LEDS;i++) {
-        allShelves[i] = CRGB(0,0,0);
-    }
-    FastLED.show();
-    delay(1000);
-    for(int i = 0;i < 10;i++) {
-        bottomShelfLeds[i] = CRGB(255,0,0);
-        middleShelfLeds[i] = CRGB(255,0,0);
-        topShelfLeds[i] = CRGB(255,0,0);
-    }
-    FastLED.show();
-}
-
-
 
 int LEDAnimations::nextPattern() {
     currentPattern = (currentPattern + 1);
@@ -139,6 +134,15 @@ int LEDAnimations::wrapToRange(int numberToWrap, int lowerBound, int upperBound)
         return upperBound;
     }
     return numberToWrap;
+}
+
+void LEDAnimations::clearAllLeds() {
+  for(uint8_t j=0;j<NUM_TOTAL_LEDS;j++) {
+      borderLeds[j] = 0;
+      if(j > NUM_BORDER_LEDS) {
+          allShelves[j%NUM_BORDER_LEDS] = 0;
+      }
+  }
 }
 
 int previousHue = 0;
@@ -240,7 +244,7 @@ void LEDAnimations::waterfallShelf(CRGB shelf[], int frequencyValue, int frequen
         shelf[NUM_SHELF_LEDS / 2 + 1] = CRGB(0, 0, 0);
     }
     memmove(&shelf[0], &shelf[1], NUM_SHELF_LEDS / 2 * sizeof(CRGB));
-    memmove(&shelf[NUM_SHELF_LEDS / 2], &shelf[NUM_SHELF_LEDS / 2 - 1], NUM_SHELF_LEDS / 2 * sizeof(CRGB));
+    memmove(&shelf[NUM_SHELF_LEDS / 2 + 1], &shelf[NUM_SHELF_LEDS / 2], NUM_SHELF_LEDS / 2 * sizeof(CRGB));
 }
 
 void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyThreshold) {
@@ -251,7 +255,7 @@ void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyThreshold) 
         borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
     }
     memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2], &borderLeds[NUM_BORDER_LEDS / 2 - 1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
+    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
 }
 
 void LEDAnimations::waterfallBorderControllerToo(int frequencyValue, int frequencyThreshold) {
@@ -262,13 +266,13 @@ void LEDAnimations::waterfallBorderControllerToo(int frequencyValue, int frequen
         borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
     }
     memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2], &borderLeds[NUM_BORDER_LEDS / 2 - 1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
+    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
 }
 
 void LEDAnimations::waterfallBorderControllerOnly() {
     borderLeds[NUM_BORDER_LEDS / 2] = CHSV(hueCounter, 200, 255);
     memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2], &borderLeds[NUM_BORDER_LEDS / 2 - 1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
+    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
 }
 
 void LEDAnimations::waterfallBorderCascading(int frequencyValue, int frequencyThreshold) {
@@ -290,7 +294,7 @@ void LEDAnimations::waterfallBorderCascading(int frequencyValue, int frequencyTh
         borderLeds[125]+=middleShelfLeds[LEDS_PER_SHELF-1];
     }
     memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2], &borderLeds[NUM_BORDER_LEDS / 2 - 1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
+    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
 }
 
 void LEDAnimations::equalizerLeftToRightBottomToTop() {
