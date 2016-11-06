@@ -3,7 +3,7 @@
 
 #include "application.h"
 #include "SpectrumEqualizer.h"
-#include "FastLED/FastLED.h"
+#include "FastLED.h"
 
 FASTLED_USING_NAMESPACE;
 

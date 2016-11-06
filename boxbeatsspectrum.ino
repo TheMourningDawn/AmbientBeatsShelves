@@ -1,6 +1,3 @@
-// This #include statement was automatically added by the Particle IDE.
-#include "FastLED/FastLED.h"
-
 #include "application.h"
 #include "LEDAnimations.h"
 #include "SpectrumEqualizer.h"
