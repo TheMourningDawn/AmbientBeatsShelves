@@ -52,6 +52,8 @@ class LEDAnimations
     void setTopShelf(int index, CHSV color);
     void waterfallBottomShelf(int frequencyValue, int frequencyThreshold);
 
+    int randomSilon();
+
     void clearAllLeds();
     void rainbow();
     void fuckinShit();

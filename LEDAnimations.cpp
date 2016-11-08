@@ -35,10 +35,12 @@ int LEDAnimations::runCurrentAnimation() {
         waterfall();
         break;
       case 1:
-        waterfallBorderControllerOnly();
+        clearAllLeds();
+        // waterfallBorderControllerOnly();
         break;
       case 2:
-        rainbow();
+        randomSilon();
+        // rainbow();
         break;
       case 3:
         juggle(equalizer->frequenciesLeft[4]);
@@ -75,6 +77,128 @@ int LEDAnimations::runCurrentAnimation() {
         break;
     }
 }
+
+int position = 0;
+boolean direction = true;
+String ledStripToUse = "border";
+int LEDAnimations::randomSilon() {
+    if(ledStripToUse == "border") {
+      borderLeds[position] = CHSV(hueCounter, 255, 255);
+    }
+    else if(ledStripToUse == "shelf") {
+      allShelves[position] = CHSV(hueCounter, 255, 255);
+    }
+    if(position == NUM_BORDER_LEDS) {
+       position = 18;
+       ledStripToUse = "shelf";
+       direction = false;
+    }
+    else if(position == 0 && ledStripToUse == "border" && direction == false) {
+       position = -1;
+       direction = true;
+       ledStripToUse = "shelf";
+    }
+    else if(position == 21 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = false;
+            position = 38;
+        }
+    }
+    else if(position == 42 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = true;
+            position = 38;
+        }
+    }
+    else if(position == 104 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = false;
+            position = 58;
+        }
+    }
+    else if(position == 125 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = true;
+            position = 19;
+        }
+    }
+    else if(position == 18 && ledStripToUse == "shelf" && direction == true) {
+      position = NUM_BORDER_LEDS - 1;
+      direction = false;
+      ledStripToUse = "border";
+    }
+    else if(position == 19 && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 125;
+        } else {
+            ledStripToUse = "border";
+            direction = false;
+            position = 125;
+        }
+    }
+    else if(position == 0 && ledStripToUse == "shelf" && direction == false) {
+       position = -1;
+       direction = true;
+       ledStripToUse = "border";
+    }
+    else if(position == 39 && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 42;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 42;
+        }
+    }
+    else if(position == 59-1 && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 104;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 104;
+        }
+    }
+    else if(position == 38 && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 21;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 21;
+        }
+    }
+    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 1);
+    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 1);
+    // EVERY_N_MILLISECONDS(15) {
+      if(direction == true) {
+          position++;
+      } else {
+        position--;
+      }
+      if(position < 0) { position = 0; }
+      if(position > NUM_BORDER_LEDS) { position = NUM_BORDER_LEDS; };
+    // }
+}
+
+// Top Shelf Left : 42
+// Top Shelf Right : 104
+// Middle Shelf Left : 21
+// Middle Shelf Right : 125
+// Bottom Shelf left : 0
+// Bottom Shelft Right : 147
 
 int LEDAnimations::nextPattern() {
     currentPattern = (currentPattern + 1);
