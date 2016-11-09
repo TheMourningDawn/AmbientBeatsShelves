@@ -193,13 +193,6 @@ int LEDAnimations::randomSilon() {
     // }
 }
 
-// Top Shelf Left : 42
-// Top Shelf Right : 104
-// Middle Shelf Left : 21
-// Middle Shelf Right : 125
-// Bottom Shelf left : 0
-// Bottom Shelft Right : 147
-
 int LEDAnimations::nextPattern() {
     currentPattern = (currentPattern + 1);
     currentPattern = wrapToRange(currentPattern, 0, 10);
@@ -332,11 +325,8 @@ void LEDAnimations::juggle(int frequencyValue) {
 }
 
 void LEDAnimations::waterfall() {
-    // waterfallShelf(topShelfLeds, equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 500));
-    // waterfallShelf(middleShelfLeds, equalizer->frequenciesLeft[frequencyMode[1]], clampSensitivity(globalSensitivity + 500));
-    // waterfallShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 500));?
     waterfallShelf(allShelves, equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 500));
-    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], 500);
+    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], 500, 200);
 }
 
 void LEDAnimations::waterfallCascading() {
@@ -386,10 +376,10 @@ void LEDAnimations::setTopShelf(int index, CHSV color) {
     allShelves[index+39] = color;
 }
 
-void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyThreshold) {
-    if (frequencyValue > frequencyThreshold) {
-        int mappedFrequencyValue = map(frequencyValue, frequencyThreshold, 1023, 0, 255);
-        borderLeds[NUM_BORDER_LEDS / 2] = CHSV(mappedFrequencyValue, 200, 255);
+void LEDAnimations::waterfallBorder(String mode, int frequencyValue, int frequencyValueMinThreshold, int brightness) {
+    if (frequencyValue > frequencyValueMinThreshold) {
+        int mappedFrequencyValue = map(frequencyValue, frequencyValueMinThreshold, 1023, 0, 255);
+        borderLeds[NUM_BORDER_LEDS / 2] = CHSV(mappedFrequencyValue, brightness, 255);
     } else {
         borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
     }
