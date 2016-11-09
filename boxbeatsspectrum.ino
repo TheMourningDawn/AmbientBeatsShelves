@@ -16,11 +16,6 @@
 #define BRIGHTNESS         120
 #define FRAMES_PER_SECOND  360
 
-// CRGBArray<NUM_SHELF_LEDS> leds;
-// CRGBset beginning(leds(1,10));  //set custom ranges
-// CRGBset middle(leds(11,20));
-// CRGBset end(leds(21,30));
-
 LEDAnimations *animations;
 SpectrumEqualizer *spectrum;
 

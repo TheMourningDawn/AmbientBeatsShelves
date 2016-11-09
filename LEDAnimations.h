@@ -52,6 +52,8 @@ class LEDAnimations
     void setTopShelf(int index, CHSV color);
     void waterfallBottomShelf(int frequencyValue, int frequencyThreshold);
 
+    int randomSilon();
+
     void clearAllLeds();
     void rainbow();
     void fuckinShit();
@@ -62,7 +64,7 @@ class LEDAnimations
     void waterfall();
     void waterfallCascading();
     void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold);
-    void waterfallBorder(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
     void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
     void waterfallBorderControllerOnly();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
