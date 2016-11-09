@@ -368,15 +368,7 @@ void LEDAnimations::setBottomShelf(int index, CHSV color) {
   }
 }
 
-void LEDAnimations::setMiddleShelf(int index, CHSV color) {
-    allShelves[index+19] = color;
-}
-
-void LEDAnimations::setTopShelf(int index, CHSV color) {
-    allShelves[index+39] = color;
-}
-
-void LEDAnimations::waterfallBorder(String mode, int frequencyValue, int frequencyValueMinThreshold, int brightness) {
+void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyValueMinThreshold, int brightness) {
     if (frequencyValue > frequencyValueMinThreshold) {
         int mappedFrequencyValue = map(frequencyValue, frequencyValueMinThreshold, 1023, 0, 255);
         borderLeds[NUM_BORDER_LEDS / 2] = CHSV(mappedFrequencyValue, brightness, 255);
@@ -404,52 +396,19 @@ void LEDAnimations::waterfallBorderControllerOnly() {
     memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
 }
 
-void LEDAnimations::waterfallBorderCascading(int frequencyValue, int frequencyThreshold) {
-    if (frequencyValue > frequencyThreshold) {
-        borderLeds[NUM_BORDER_LEDS / 2] = CHSV(map(frequencyValue, frequencyThreshold, 1023, 0, 255), 200, 255);
-    } else {
-        borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
-    }
-    if(topShelfLeds[0]){
-        borderLeds[42]+=topShelfLeds[0];
-    }
-    if(topShelfLeds[LEDS_PER_SHELF-1]) {
-        borderLeds[104]+=topShelfLeds[LEDS_PER_SHELF-1];
-    }
-    if(middleShelfLeds[0]){
-        borderLeds[21]+=middleShelfLeds[0];
-    }
-    if(middleShelfLeds[LEDS_PER_SHELF-1]) {
-        borderLeds[125]+=middleShelfLeds[LEDS_PER_SHELF-1];
-    }
-    memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-}
 int maxFrequencyValue = 0;
 void LEDAnimations::equalizerLeftToRightBottomToTop() {
-  EVERY_N_SECONDS(5) {
-    char numAsString[40];
-    sprintf(numAsString, "%d", maxFrequencyValue);
-    Particle.publish("frequencyValue", numAsString);
-  }
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], 300, false);
     equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), true);
     equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 200), false);
-    // equalizerShelf(topShelfLeds, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
-    // equalizerShelf(middleShelfLeds, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), true);
-    // equalizerShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerRightToLeftBottomToTop() {
     equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 200), false);
     equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 200), false);
     equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
-    // equalizerShelf(topShelfLeds, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), true);
-    // equalizerShelf(middleShelfLeds, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
-    // equalizerShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), true);
 }
-
 
 void LEDAnimations::equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction) {
     int ledsInSection = 62;
