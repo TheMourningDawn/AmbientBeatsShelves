@@ -13,7 +13,7 @@ void SpectrumEqualizer::init() {
     pinMode(RESET_PIN, OUTPUT); // reset
     pinMode(STROBE_PIN, OUTPUT); // strobe
     digitalWrite(RESET_PIN, LOW); // reset low
-    digitalWrite(STROBE_PIN, HIGH); //pin 5 is RESET on the shield   
+    digitalWrite(STROBE_PIN, HIGH); //pin 5 is RESET on the shield
 }
 
 void SpectrumEqualizer::readAudioFrequencies() {
@@ -26,13 +26,6 @@ void SpectrumEqualizer::readAudioFrequencies() {
         delayMicroseconds(50); // gather some data
         frequenciesLeft[band] = analogRead(LEFT_EQ_PIN); // store left band reading
         frequenciesRight[band] = analogRead(RIGHT_EQ_PIN); // store right band reading
-        //     if(band == 4) {
-        //         EVERY_N_SECONDS(1) {
-        //             char howLong[40];
-        //             sprintf(howLong, "%i", analogRead(RIGHT_EQ_PIN));
-        //             Particle.publish("Fresh Off Da Press", howLong);
-        //         }
-        // }
         digitalWrite(STROBE_PIN, HIGH); // reset the strobe pin
     }
 }

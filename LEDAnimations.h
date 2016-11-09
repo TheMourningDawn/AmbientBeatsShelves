@@ -3,11 +3,11 @@
 
 #include "application.h"
 #include "SpectrumEqualizer.h"
-#include "FastLED/FastLED.h"
+#include "FastLED.h"
 
 FASTLED_USING_NAMESPACE;
 
-#define NUM_SHELF_LEDS 60
+#define NUM_SHELF_LEDS 59
 #define LEDS_PER_SHELF 20
 #define NUM_BORDER_LEDS 147
 #define NUM_TOTAL_LEDS NUM_BORDER_LEDS + NUM_SHELF_LEDS
@@ -19,14 +19,17 @@ FASTLED_USING_NAMESPACE;
 
 class LEDAnimations
 {
-private:
+  private:
     SpectrumEqualizer *equalizer;
-public:
+  public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    CRGB* bottomShelfLeds;
-    CRGB* middleShelfLeds;
-    CRGB* topShelfLeds;
+    // CRGB *bottomShelfLeds[LEDS_PER_SHELF];
+    // CRGB *middleShelfLeds[LEDS_PER_SHELF];
+    // CRGB *topShelfLeds[LEDS_PER_SHELF];
+    CRGB *bottomShelfLeds;
+    CRGB *middleShelfLeds;
+    CRGB *topShelfLeds;
     uint8_t currentPattern;
     uint8_t numberOfPatterns;
     uint8_t hueCounter;
@@ -44,7 +47,14 @@ public:
     int clampSensitivity(int sensitivity);
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
+    void setBottomShelf(int index, CHSV color);
+    void setMiddleShelf(int index, CHSV color);
+    void setTopShelf(int index, CHSV color);
+    void waterfallBottomShelf(int frequencyValue, int frequencyThreshold);
+
+    void clearAllLeds();
     void rainbow();
+    void fuckinShit();
     void confetti(int frequencyValue);
     void sinelon(int frequencyValue);
     void bpm();
@@ -53,6 +63,8 @@ public:
     void waterfallCascading();
     void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold);
     void waterfallBorder(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorderControllerOnly();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
