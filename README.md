@@ -1,2 +1,2 @@
-BoxBeatsPhoton - Music reactive shelving accent lighting
+BoxBeatsPhoton - Music reactive accent lighting
 ====================

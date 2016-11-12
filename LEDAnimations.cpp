@@ -3,28 +3,35 @@
 
 #include "application.h"
 #include "LEDAnimations.h"
+#include "Shelf.h"
 
 CRGB borderLeds[NUM_BORDER_LEDS];
 CRGB allShelves[NUM_SHELF_LEDS];
 
-CRGB *bottomShelfLeds;
-CRGB *middleShelfLeds;
-CRGB *topShelfLeds;
+Shelf *topShelf;
+Shelf *middleShelf;
+Shelf *bottomShelf;
 
 SpectrumEqualizer *equalizer;
 
 int globalSensitivity = 0;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
-uint8_t numberOfPatterns = 7;
-uint8_t currentPattern = 0;
+uint8_t numberOfPatterns = 9;
+int currentPattern = 0;
 uint8_t hueCounter = 0;
 
 LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
     equalizer->init();
+    topShelf = new Shelf(allShelves, 39, 58);
+    middleShelf = new Shelf(allShelves, 38, 19);
+    bottomShelf = new Shelf(allShelves, 0, 18);
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
     equalizer->init();
+    topShelf = new Shelf(allShelves, 39, 58);
+    middleShelf = new Shelf(allShelves, 38, 19);
+    bottomShelf = new Shelf(allShelves, 0, 18);
 }
 
 int LEDAnimations::runCurrentAnimation() {
@@ -35,12 +42,16 @@ int LEDAnimations::runCurrentAnimation() {
         waterfall();
         break;
       case 1:
-        clearAllLeds();
+      middleShelf->setRightPixel(CRGB(255,0,0));
+      middleShelf->setLeftPixel(CRGB(0,255,0));
+      bottomShelf->setRightPixel(CRGB(255,0,0));
+      bottomShelf->setLeftPixel(CRGB(0,255,0));
+      topShelf->setRightPixel(CRGB(255,0,0));
+      topShelf->setLeftPixel(CRGB(0,255,0));
         // waterfallBorderControllerOnly();
         break;
       case 2:
         randomSilon();
-        // rainbow();
         break;
       case 3:
         juggle(equalizer->frequenciesLeft[4]);
@@ -49,10 +60,7 @@ int LEDAnimations::runCurrentAnimation() {
         confetti(equalizer->frequenciesLeft[4]);
         break;
       case 5:
-        sinelon(equalizer->frequenciesLeft[4]);
-        break;
-      case 7:
-        clearAllLeds();
+        rainbow();
         break;
       case 6:
         for(uint8_t j=0;j<NUM_BORDER_LEDS;j++) {
@@ -62,18 +70,17 @@ int LEDAnimations::runCurrentAnimation() {
             allShelves[j].setHue(hueCounter);
         }
         break;
+      case 7:
+        equalizerRightToLeftBottomToTop();
+        break;
       case 8:
+        equalizerLeftToRightBottomToTop();
+        break;
+      case 9:
         borderLeds[22] = CRGB(200,0,0);
         waterfallBottomShelf(equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 500));
         break;
-      case 9:
-        equalizerLeftToRightBottomToTop();
-        break;
-      case 10:
-        equalizerRightToLeftBottomToTop();
-        break;
       default:
-        clearAllLeds();
         break;
     }
 }
@@ -194,14 +201,16 @@ int LEDAnimations::randomSilon() {
 }
 
 int LEDAnimations::nextPattern() {
-    currentPattern = (currentPattern + 1);
+    currentPattern++;
     currentPattern = wrapToRange(currentPattern, 0, 10);
+    clearAllLeds();
     return currentPattern;
 }
 
 int LEDAnimations::previousPattern() {
-    currentPattern = (currentPattern - 1);
+    currentPattern--;
     currentPattern = wrapToRange(currentPattern, 0, 10);
+    clearAllLeds();
     return currentPattern;
 }
 
@@ -331,9 +340,9 @@ void LEDAnimations::waterfall() {
 
 void LEDAnimations::waterfallCascading() {
     waterfallBorderCascading(equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity((globalSensitivity + 500)));
-    waterfallShelf(topShelfLeds, equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 500));
-    waterfallShelf(middleShelfLeds, equalizer->frequenciesLeft[frequencyMode[1]], clampSensitivity(globalSensitivity + 500));
-    waterfallShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 500));
+    // waterfallShelf(topShelfLeds, equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 500));
+    // waterfallShelf(middleShelfLeds, equalizer->frequenciesLeft[frequencyMode[1]], clampSensitivity(globalSensitivity + 500));
+    // waterfallShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 500));
 }
 
 void LEDAnimations::waterfallShelf(CRGB shelf[], int frequencyValue, int frequencyThreshold) {

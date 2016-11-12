@@ -4,6 +4,7 @@
 #include "application.h"
 #include "SpectrumEqualizer.h"
 #include "FastLED.h"
+#include "Shelf.h"
 
 FASTLED_USING_NAMESPACE;
 
@@ -21,16 +22,16 @@ class LEDAnimations
 {
   private:
     SpectrumEqualizer *equalizer;
+    Shelf *topShelf;
+    Shelf *middleShelf;
+    Shelf *bottomShelf;
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    // CRGB *bottomShelfLeds[LEDS_PER_SHELF];
-    // CRGB *middleShelfLeds[LEDS_PER_SHELF];
-    // CRGB *topShelfLeds[LEDS_PER_SHELF];
     CRGB *bottomShelfLeds;
     CRGB *middleShelfLeds;
     CRGB *topShelfLeds;
-    uint8_t currentPattern;
+    int currentPattern;
     uint8_t numberOfPatterns;
     uint8_t hueCounter;
 
