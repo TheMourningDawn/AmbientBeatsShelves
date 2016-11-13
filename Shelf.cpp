@@ -6,8 +6,9 @@
 
 CRGB *shelfStrip;
 
-int left = 0;
-int right = 0;
+int left;
+int right;
+int previousPushIndex;
 
 Shelf::Shelf() {}
 
@@ -15,6 +16,11 @@ Shelf::Shelf() {}
 Shelf::Shelf(CRGB *shelves, int leftIndex, int rightIndex) : shelfStrip(shelves) {
   left = leftIndex;
   right = rightIndex;
+  previousPushIndex = leftIndex;
+}
+
+void Shelf::setPixel(int index, CRGB color) {
+  shelfStrip[index] = color;
 }
 
 void Shelf::setRightPixel(CRGB color) {
@@ -23,13 +29,108 @@ void Shelf::setRightPixel(CRGB color) {
 
 void Shelf::setLeftPixel(CRGB color) {
   shelfStrip[left] = color;
-  // shelfStrip[left] = CRGB(255,0,0);
 }
 
-// void Shelf::shiftRight() {}
-// void Shelf::sheftRightBy(int shiftAmount) {}
-// void Shelf::shiftLeft() {}
-// void Shelf::sheftLeftBy(int shiftAmount) {}
+CRGB Shelf::getRightPixel() {
+  return shelfStrip[right];
+}
+
+CRGB Shelf::getLeftPixel() {
+  return shelfStrip[left];
+}
+
+int Shelf::length() {
+  return abs(left - right) + 1;
+}
+
+void Shelf::shiftRight() {
+  if(left-right < 0) {
+    memmove(&shelfStrip[left+1], &shelfStrip[left], (length()-1) * sizeof(CRGB));
+  } else  {
+    memmove(&shelfStrip[right], &shelfStrip[right+1], (length()-1) * sizeof(CRGB));
+  }
+}
+void Shelf::shiftLeft() {
+  if(left-right < 0) {
+    memmove(&shelfStrip[left], &shelfStrip[left+1], (length()-1) * sizeof(CRGB));
+  } else  {
+    memmove(&shelfStrip[right+1], &shelfStrip[right], (length()-1) * sizeof(CRGB));
+  }
+}
+
+void Shelf::pushRight(CRGB color) {
+  if(left-right < 0) {
+    previousPushIndex++;
+    if(previousPushIndex < left) {
+      previousPushIndex = left;
+    }
+    if(previousPushIndex > right) {
+      previousPushIndex = right;
+    }
+  } else {
+    previousPushIndex--;
+    if(previousPushIndex > left) {
+      previousPushIndex = left;
+    }
+    if(previousPushIndex < right) {
+      previousPushIndex = right;
+    }
+  }
+  shelfStrip[previousPushIndex] = color;
+}
+
+void Shelf::pushLeft(CRGB color) {
+  if(left-right < 0) {
+    previousPushIndex--;
+    if(previousPushIndex < left) {
+      previousPushIndex = left;
+    }
+    if(previousPushIndex > right) {
+      previousPushIndex = right;
+    }
+  } else {
+    previousPushIndex++;
+    if(previousPushIndex > left) {
+      previousPushIndex = left;
+    }
+    if(previousPushIndex < right) {
+      previousPushIndex = right;
+    }
+  }
+  shelfStrip[previousPushIndex] = color;
+}
+
+void Shelf::fillLeft(CRGB color, int numToFill) {
+  if(left-right < 0) {
+    int cappedFill = numToFill > length()-1 ? length() - 1 : numToFill;
+    for(int i=left;i<left+cappedFill;i++) {
+      shelfStrip[i] = color;
+    }
+  } else {
+    int cappedFill = numToFill > length()-1 ? length() - 1 : numToFill;
+    for(int i=left;i>left-cappedFill;i--) {
+      shelfStrip[i] = color;
+    }
+  }
+}
+
+void Shelf::fillRight(CRGB color, int numToFill) {
+  if(left-right < 0) {
+    int cappedFill = numToFill > length()-1 ? length() - 1 : numToFill;
+    for(int i=right;i>right-cappedFill;i--) {
+      shelfStrip[i] = color;
+    }
+  } else {
+    int cappedFill = numToFill > length()-1 ? length() - 1 : numToFill;
+    for(int i=right;i<right+cappedFill;i++) {
+      shelfStrip[i] = color;
+    }
+  }
+}
+
+// void Shelf::fadeToBlackBy(45) {
+//   fadeToBlackBy(shelfStrip, LEDS_PER_SHELF, 45);
+// }
 
 // char currentPatternString[40];
 // sprintf(currentPatternString, "%d", left);

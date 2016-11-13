@@ -74,7 +74,7 @@ class LEDAnimations
     void equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction);
     void equalizerRightBorder(int frequencyValue, int sensitivityThreshold, bool direction);
     void equalizerTopBorder(int frequencyValue, int sensitivityThreshold, bool direction);
-    void equalizerShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold, bool direction);
+    void equalizerShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, bool direction);
 };
 
 #endif

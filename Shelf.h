@@ -13,15 +13,22 @@ private:
   CRGB *shelfStrip;
   int left;
   int right;
+  int previousPushIndex;
 public:
   Shelf();
   Shelf(CRGB *shelves, int leftIndex, int rightIndex);
+  void setPixel(int index, CRGB color);
   void setRightPixel(CRGB color);
   void setLeftPixel(CRGB color);
-//   void shiftRight();
-//   void sheftRightBy(int shiftAmount);
-//   void shiftLeft();
-//   void sheftLeftBy(int shiftAmount);
+  CRGB getRightPixel();
+  CRGB getLeftPixel();
+  int length();
+  void shiftRight();
+  void shiftLeft();
+  void pushLeft(CRGB color);
+  void pushRight(CRGB color);
+  void fillLeft(CRGB color, int numToFill);
+  void fillRight(CRGB color, int numToFill);
 };
 
 #endif
