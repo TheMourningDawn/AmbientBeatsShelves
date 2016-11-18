@@ -64,7 +64,7 @@ class LEDAnimations
     void juggle(int frequencyValue);
     void waterfall();
     void waterfallCascading();
-    void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold);
+    void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold, int brightness);
     void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
     void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
     void waterfallBorderControllerOnly();

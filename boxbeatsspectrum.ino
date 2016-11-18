@@ -27,7 +27,7 @@ int hueValue = 100;
 void setup() {
     // Serial.begin(9600);
 
-    setupModeFunctions()
+    setupModeFunctions();
     connectToRemote();
 
     spectrum = new SpectrumEqualizer();
