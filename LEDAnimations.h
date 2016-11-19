@@ -28,9 +28,6 @@ class LEDAnimations
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    CRGB *bottomShelfLeds;
-    CRGB *middleShelfLeds;
-    CRGB *topShelfLeds;
     int currentPattern;
     uint8_t numberOfPatterns;
     uint8_t hueCounter;
@@ -48,27 +45,24 @@ class LEDAnimations
     int clampSensitivity(int sensitivity);
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
-    void setBottomShelf(int index, CHSV color);
-    void setMiddleShelf(int index, CHSV color);
-    void setTopShelf(int index, CHSV color);
-    void waterfallBottomShelf(int frequencyValue, int frequencyThreshold);
-
     int randomSilon();
 
     void clearAllLeds();
     void rainbow();
-    void fuckinShit();
     void confetti(int frequencyValue);
     void sinelon(int frequencyValue);
     void bpm();
     void juggle(int frequencyValue);
+
     void waterfall();
     void waterfallCascading();
-    void waterfallShelf(CRGB shelf[], int frequencyValue, int sensitivityThreshold, int brightness);
+    void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
     void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
+
     void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
     void waterfallBorderControllerOnly();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
+
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
     void equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction);

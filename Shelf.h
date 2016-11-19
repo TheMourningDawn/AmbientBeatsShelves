@@ -20,11 +20,14 @@ public:
   void setPixel(int index, CRGB color);
   void setRightPixel(CRGB color);
   void setLeftPixel(CRGB color);
+  int getRightPixelIndex();
+  int getLeftPixelIndex();
   CRGB getRightPixel();
   CRGB getLeftPixel();
   int length();
   void shiftRight();
   void shiftLeft();
+  void shiftMiddle();
   void pushLeft(CRGB color);
   void pushRight(CRGB color);
   void fillLeft(CRGB color, int numToFill);

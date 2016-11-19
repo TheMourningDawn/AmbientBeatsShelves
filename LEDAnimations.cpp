@@ -350,7 +350,9 @@ void LEDAnimations::juggle(int frequencyValue) {
 void LEDAnimations::waterfall() {
     int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
     int brightness = 220;
-    waterfallShelf(allShelves, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness);
+    waterfallShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+    waterfallShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+    waterfallShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
     waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
@@ -361,17 +363,18 @@ void LEDAnimations::waterfallCascading() {
     // waterfallShelf(bottomShelfLeds, equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 500));
 }
 
-void LEDAnimations::waterfallShelf(CRGB shelf[], int frequencyValue, int frequencyThreshold, int brightness) {
+void LEDAnimations::waterfallShelf(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset) {
+    int middlePixel = (shelf->getRightPixelIndex() + shelf->getLeftPixelIndex())/2;
     if (frequencyValue > frequencyThreshold) {
         int mappedFrequencyValue = map(frequencyValue, frequencyThreshold, 4096, 0, 255);
-        shelf[NUM_SHELF_LEDS / 2] = CHSV(mappedFrequencyValue, brightness, 255);
-        shelf[NUM_SHELF_LEDS / 2 + 1] = CHSV(mappedFrequencyValue, brightness, 255);
+        mappedFrequencyValue = (mappedFrequencyValue + baseColorOffset) % 255; //offsetting the base color...
+        shelf->setPixel(middlePixel, CHSV(mappedFrequencyValue, brightness, 255));
+        shelf->setPixel(middlePixel + 1, CHSV(mappedFrequencyValue, brightness, 255));
     } else {
-        shelf[NUM_SHELF_LEDS / 2] = CRGB(0, 0, 0);
-        shelf[NUM_SHELF_LEDS / 2 + 1] = CRGB(0, 0, 0);
+      shelf->setPixel(middlePixel, CRGB(0, 0, 0));
+      shelf->setPixel(middlePixel + 1, CRGB(0, 0, 0));
     }
-    memmove(&shelf[0], &shelf[1], NUM_SHELF_LEDS / 2 * sizeof(CRGB));
-    memmove(&shelf[NUM_SHELF_LEDS / 2 + 1], &shelf[NUM_SHELF_LEDS / 2], NUM_SHELF_LEDS / 2 * sizeof(CRGB));
+    shelf->shiftMiddle();
 }
 
 void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyValueMinThreshold, int brightness) {

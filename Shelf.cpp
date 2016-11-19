@@ -19,6 +19,14 @@ Shelf::Shelf(CRGB *shelves, int leftIndex, int rightIndex) : shelfStrip(shelves)
   previousPushIndex = leftIndex;
 }
 
+int Shelf::getRightPixelIndex() {
+   return right;
+}
+
+int Shelf::getLeftPixelIndex() {
+    return left;
+}
+
 void Shelf::setPixel(int index, CRGB color) {
   shelfStrip[index] = color;
 }
@@ -56,6 +64,16 @@ void Shelf::shiftLeft() {
   } else  {
     memmove(&shelfStrip[right+1], &shelfStrip[right], (length()-1) * sizeof(CRGB));
   }
+}
+
+void Shelf::shiftMiddle() {
+    if(left < right) {
+      memmove(&shelfStrip[left], &shelfStrip[left+1], (length() / 2) * sizeof(CRGB));
+      memmove(&shelfStrip[(left + right)/2 + 1], &shelfStrip[(left + right)/2], (length() / 2) * sizeof(CRGB));
+    } else {
+      memmove(&shelfStrip[right], &shelfStrip[right+1], length() / 2 * sizeof(CRGB));
+      memmove(&shelfStrip[(left + right)/2 + 1], &shelfStrip[(left + right)/2], (length() / 2) * sizeof(CRGB));
+    }
 }
 
 void Shelf::pushRight(CRGB color) {
