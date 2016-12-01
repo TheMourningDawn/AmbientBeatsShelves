@@ -16,7 +16,7 @@ FASTLED_USING_NAMESPACE;
 #define BRIGHTNESS         120
 #define FRAMES_PER_SECOND  240
 
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 class LEDAnimations
 {
@@ -45,14 +45,14 @@ class LEDAnimations
     int clampSensitivity(int sensitivity);
     int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
 
-    int randomSilon();
+    void randomSilon();
 
     void clearAllLeds();
     void rainbow();
-    void confetti(int frequencyValue);
-    void sinelon(int frequencyValue);
+    void confetti();
+    void sinelon();
     void bpm();
-    void juggle(int frequencyValue);
+    void juggle();
 
     void waterfall();
     void waterfallCascading();

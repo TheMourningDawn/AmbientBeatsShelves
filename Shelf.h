@@ -6,8 +6,6 @@
 
 FASTLED_USING_NAMESPACE;
 
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)
-
 class Shelf {
 private:
   CRGB *shelfStrip;

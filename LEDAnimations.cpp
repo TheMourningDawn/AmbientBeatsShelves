@@ -14,17 +14,24 @@ Shelf *bottomShelf;
 
 SpectrumEqualizer *equalizer;
 
+sfafaweg
+
 int globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
-uint8_t numberOfPatterns = 9;
+uint8_t numberOfPatterns = 0;
 int currentPattern = 0;
 uint8_t hueCounter = 0;
+
+typedef void (LEDAnimations::*AnimationList)();
+
+AnimationList animationList[] = { &LEDAnimations::waterfall, &LEDAnimations::waterfallBorderControllerOnly, &LEDAnimations::randomSilon, &LEDAnimations::confetti, &LEDAnimations::bpm, &LEDAnimations::juggle, &LEDAnimations::rainbow, &LEDAnimations::equalizerRightToLeftBottomToTop, &LEDAnimations::equalizerLeftToRightBottomToTop };
 
 LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
     equalizer->init();
     topShelf = new Shelf(allShelves, 39, 58);
     middleShelf = new Shelf(allShelves, 38, 19);
     bottomShelf = new Shelf(allShelves, 0, 18);
+    numberOfPatterns = ARRAY_SIZE(animationList) - 1;
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
@@ -32,79 +39,19 @@ LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
     topShelf = new Shelf(allShelves, 39, 58);
     middleShelf = new Shelf(allShelves, 38, 19);
     bottomShelf = new Shelf(allShelves, 0, 18);
+    numberOfPatterns = ARRAY_SIZE(animationList) - 1;
 }
 
 int LEDAnimations::runCurrentAnimation() {
     equalizer->readAudioFrequencies();
 
-    switch (currentPattern) {
-      case 0:
-        waterfall();
-        break;
-      case 1:
-        waterfallBorderControllerOnly();
-        break;
-      case 2:
-        randomSilon();
-        break;
-      case 3:
-        juggle(equalizer->frequenciesLeft[4]);
-        break;
-      case 4:
-        confetti(equalizer->frequenciesLeft[4]);
-        break;
-      case 5:
-        rainbow();
-        break;
-      case 6:
-        for(uint8_t j=0;j<NUM_BORDER_LEDS;j++) {
-            borderLeds[j].setHue(hueCounter);
-        }
-        for(uint8_t j=0;j<NUM_SHELF_LEDS;j++) {
-            allShelves[j].setHue(hueCounter);
-        }
-        break;
-      case 7:
-        equalizerRightToLeftBottomToTop();
-        break;
-      case 8:
-        equalizerLeftToRightBottomToTop();
-        break;
-      case 9:
-        clearAllLeds();
-        middleShelf->setRightPixel(CRGB(255,0,0));
-        middleShelf->setLeftPixel(CRGB(0,255,0));
-        bottomShelf->setRightPixel(CRGB(255,0,0));
-        bottomShelf->setLeftPixel(CRGB(0,255,0));
-        topShelf->setRightPixel(CRGB(255,0,0));
-        topShelf->setLeftPixel(CRGB(0,255,0));
-
-        for(int i=0;i<middleShelf->length();i++) {
-            middleShelf->pushRight(CRGB(255,0,0));
-            topShelf->pushRight(CRGB(0,255,0));
-            bottomShelf->pushRight(CRGB(0,0,255));
-            FastLED.show();
-            fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 50);
-            delay(100);
-        }
-        for(int i=0;i<middleShelf->length();i++) {
-            middleShelf->pushLeft(CRGB(255,0,0));
-            topShelf->pushLeft(CRGB(0,255,0));
-            bottomShelf->pushLeft(CRGB(0,0,255));
-            FastLED.show();
-            fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 50);
-            delay(100);
-        }
-        break;
-      default:
-        break;
-    }
+    (this->*animationList[currentPattern])();
 }
 
 int position = 0;
 boolean direction = true;
 String ledStripToUse = "border";
-int LEDAnimations::randomSilon() {
+void LEDAnimations::randomSilon() {
     if(ledStripToUse == "border") {
       borderLeds[position] = CHSV(hueCounter, 255, 255);
     }
@@ -216,14 +163,14 @@ int LEDAnimations::randomSilon() {
 
 int LEDAnimations::nextPattern() {
     currentPattern++;
-    currentPattern = wrapToRange(currentPattern, 0, 10);
+    currentPattern = wrapToRange(currentPattern, 0, numberOfPatterns);
     clearAllLeds();
     return currentPattern;
 }
 
 int LEDAnimations::previousPattern() {
     currentPattern--;
-    currentPattern = wrapToRange(currentPattern, 0, 10);
+    currentPattern = wrapToRange(currentPattern, 0, numberOfPatterns);
     clearAllLeds();
     return currentPattern;
 }
@@ -281,7 +228,7 @@ void LEDAnimations::rainbow() {
 }
 
 // random colored speckles that blink in and fade smoothly
-void LEDAnimations::confetti(int frequencyValue) {
+void LEDAnimations::confetti() {
     uint8_t position = random16(NUM_TOTAL_LEDS);
     uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
 
@@ -298,7 +245,7 @@ void LEDAnimations::confetti(int frequencyValue) {
 }
 
 // a colored dot sweeping back and forth, with fading trails
-void LEDAnimations::sinelon(int frequencyValue) {
+void LEDAnimations::sinelon() {
     uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 5);
@@ -328,7 +275,8 @@ void LEDAnimations::bpm() {
 }
 
 // eight colored dots, weaving in and out of sync with each other
-void LEDAnimations::juggle(int frequencyValue) {
+void LEDAnimations::juggle() {
+    int frequencyValue = equalizer->frequenciesLeft[frequencyMode[0]];
     uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 20);
