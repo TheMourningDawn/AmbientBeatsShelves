@@ -3,31 +3,25 @@
 
 #include "SpectrumEqualizer.h"
 #include "application.h"
-#include "LEDAnimations.h"
+
+UDP multicastUDP;
+int port;
 
 SpectrumEqualizer::SpectrumEqualizer() {
+  port = 32555;
+  IPAddress remoteIP(239,1,1,234);
 
-}
-
-void SpectrumEqualizer::init() {
-    pinMode(RESET_PIN, OUTPUT); // reset
-    pinMode(STROBE_PIN, OUTPUT); // strobe
-    digitalWrite(RESET_PIN, LOW); // reset low
-    digitalWrite(STROBE_PIN, HIGH); //pin 5 is RESET on the shield
+  multicastUDP.begin(port);
+  multicastUDP.joinMulticast(remoteIP);
 }
 
 void SpectrumEqualizer::readAudioFrequencies() {
-    // reset the data
-    digitalWrite(RESET_PIN, HIGH);
-    digitalWrite(RESET_PIN, LOW);
-
-    for (int band = 0; band < 7; band++) {
-        digitalWrite(STROBE_PIN, LOW); // go to the next band
-        delayMicroseconds(50); // gather some data
-        frequenciesLeft[band] = analogRead(LEFT_EQ_PIN); // store left band reading
-        frequenciesRight[band] = analogRead(RIGHT_EQ_PIN); // store right band reading
-        digitalWrite(STROBE_PIN, HIGH); // reset the strobe pin
+    multicastUDP.parsePacket();
+    for(int i=0;i<7;i++) {
+      int value = multicastUDP.read() << 8 | multicastUDP.read();
+      frequenciesLeft[i] = value;
     }
+    // Serial.printlnf("frequenciesLeft: [%d, %d, %d, %d]", frequenciesLeft[0],frequenciesLeft[2],frequenciesLeft[4],frequenciesLeft[6]);
 }
 
 #endif

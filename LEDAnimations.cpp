@@ -14,8 +14,6 @@ Shelf *bottomShelf;
 
 SpectrumEqualizer *equalizer;
 
-sfafaweg
-
 int globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
 uint8_t numberOfPatterns = 0;
@@ -24,10 +22,9 @@ uint8_t hueCounter = 0;
 
 typedef void (LEDAnimations::*AnimationList)();
 
-AnimationList animationList[] = { &LEDAnimations::waterfall, &LEDAnimations::waterfallBorderControllerOnly, &LEDAnimations::randomSilon, &LEDAnimations::confetti, &LEDAnimations::bpm, &LEDAnimations::juggle, &LEDAnimations::rainbow, &LEDAnimations::equalizerRightToLeftBottomToTop, &LEDAnimations::equalizerLeftToRightBottomToTop };
+AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::randomSilon, &LEDAnimations::waterfallBorderControllerOnly, &LEDAnimations::confetti, &LEDAnimations::bpm, &LEDAnimations::juggle, &LEDAnimations::rainbow, &LEDAnimations::equalizerRightToLeftBottomToTop, &LEDAnimations::equalizerLeftToRightBottomToTop };
 
 LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
-    equalizer->init();
     topShelf = new Shelf(allShelves, 39, 58);
     middleShelf = new Shelf(allShelves, 38, 19);
     bottomShelf = new Shelf(allShelves, 0, 18);
@@ -35,7 +32,6 @@ LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
-    equalizer->init();
     topShelf = new Shelf(allShelves, 39, 58);
     middleShelf = new Shelf(allShelves, 38, 19);
     bottomShelf = new Shelf(allShelves, 0, 18);
@@ -44,7 +40,6 @@ LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
 
 int LEDAnimations::runCurrentAnimation() {
     equalizer->readAudioFrequencies();
-
     (this->*animationList[currentPattern])();
 }
 

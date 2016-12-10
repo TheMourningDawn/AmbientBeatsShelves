@@ -13,9 +13,6 @@ FASTLED_USING_NAMESPACE;
 #define NUM_BORDER_LEDS 147
 #define NUM_TOTAL_LEDS NUM_BORDER_LEDS + NUM_SHELF_LEDS
 
-#define BRIGHTNESS         120
-#define FRAMES_PER_SECOND  240
-
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 class LEDAnimations

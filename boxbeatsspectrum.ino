@@ -8,74 +8,74 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
-#define NUM_SHELF_LEDS 60
-#define LEDS_PER_SHELF 20
-#define NUM_BORDER_LEDS 147
-#define NUM_TOTAL_LEDS NUM_BORDER_LEDS + NUM_SHELF_LEDS
-
 #define BRIGHTNESS         120
 #define FRAMES_PER_SECOND  360
 
 LEDAnimations *animations;
 SpectrumEqualizer *spectrum;
 
-TCPClient client;
-byte server[] = { 192, 168, 1, 103 };
-int port = 54555;
-int hueValue = 100;
+// TCPClient client;
+// byte server[] = { 192, 168, 1, 103 };
+// int tcpPort = 54555;
+/*int hueValue = 100;*/
+
+/*SYSTEM_MODE(MANUAL);*/
+/*SYSTEM_THREAD(ENABLED);*/
 
 void setup() {
-    // Serial.begin(9600);
+    /*Serial.begin(11520);*/
 
     setupModeFunctions();
-    connectToRemote();
+    // connectToRemote();
 
     spectrum = new SpectrumEqualizer();
     animations = new LEDAnimations(spectrum);
 
-    FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds, NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds , NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.addLeds<LED_TYPE, SHELF_LED_PIN, COLOR_ORDER>(animations->allShelves, NUM_SHELF_LEDS).setCorrection(TypicalLEDStrip);
 
     animations->currentPattern = 0;
-}
+  }
 
 void loop() {
-    if(client.connected()) {
-        readColorFromRemote();
-    } else {
-      connectToRemote();
-    }
+    // if(client.connected()) {
+    //     readColorFromRemote();
+    // } else {
+    //   connectToRemote();
+    // }
+
     animations->runCurrentAnimation();
     FastLED.show();
-    // FastLED.delay(1000 / FRAMES_PER_SECOND);
+
+    /*FastLED.delay(1000 / FRAMES_PER_SECOND);*/
 
     // EVERY_N_MILLISECONDS(20) { animations->hueCounter++; } // slowly cycle the "base color" through the rainbow
 }
 
-void readColorFromRemote() {
-  client.println("s");
-  if(client.available()) {
-      char hueFromController[3];
-      int readCount = 0;
-      while(client.available()) {
-          char c = client.read();
-          hueFromController[readCount] = c;
-          readCount++;
-      }
-      hueValue = atoi(hueFromController);
-  }
-  animations->hueCounter = hueValue;
-}
+// void readColorFromRemote() {
+//   client.println("s");
+//   if(client.available()) {
+//       char hueFromController[3];
+//       int readCount = 0;
+//       while(client.available()) {
+//           char c = client.read();
+//           hueFromController[readCount] = c;
+//           readCount++;
+//       }
+//       hueValue = atoi(hueFromController);
+//   }
+//   animations->hueCounter = hueValue;
+// }
 
-void connectToRemote() {
-  if (client.connect(server, port)) {
-      Serial.println("Connected");
-      Particle.publish("Connected");
-  } else {
-      Serial.println("Connection failed");
-      Particle.publish("Connection failed");
-  }
-}
+// void connectToRemote() {
+//   if (client.connect(server, tcpPort)) {
+//       Serial.println("Connected");
+//       Particle.publish("Connected");
+//   } else {
+//       Serial.println("Connection failed");
+//       Particle.publish("Connection failed");
+//   }
+// }
 
 void setupModeFunctions() {
   Particle.function("nextMode", nextMode);
@@ -87,9 +87,9 @@ void setupModeFunctions() {
 
 int nextMode(String mode) {
     int currentPattern = animations->nextPattern();
-    char currentPatternString[5];
+    /*char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Current Pattern", currentPatternString);*/
     return 1;
 }
 
@@ -99,9 +99,9 @@ void handleNextMode(const char *eventName, const char *data) {
 
 int previousMode(String mode) {
     int currentPattern = animations->previousPattern();
-    char currentPatternString[5];
+    /*char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Current Pattern", currentPatternString);*/
     return 1;
 }
 
