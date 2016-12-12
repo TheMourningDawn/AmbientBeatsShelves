@@ -14,10 +14,11 @@
 LEDAnimations *animations;
 SpectrumEqualizer *spectrum;
 
-// TCPClient client;
-// byte server[] = { 192, 168, 1, 103 };
-// int tcpPort = 54555;
-/*int hueValue = 100;*/
+TCPClient client;
+byte server[] = { 192, 168, 1, 125 };
+int tcpPort = 54555;
+
+int hueValue = 100;
 
 /*SYSTEM_MODE(MANUAL);*/
 /*SYSTEM_THREAD(ENABLED);*/
@@ -26,7 +27,7 @@ void setup() {
     /*Serial.begin(11520);*/
 
     setupModeFunctions();
-    // connectToRemote();
+    connectToRemote();
 
     spectrum = new SpectrumEqualizer();
     animations = new LEDAnimations(spectrum);
@@ -38,11 +39,11 @@ void setup() {
   }
 
 void loop() {
-    // if(client.connected()) {
-    //     readColorFromRemote();
-    // } else {
-    //   connectToRemote();
-    // }
+    if(client.connected()) {
+        readColorFromRemote();
+    } else {
+      connectToRemote();
+    }
 
     animations->runCurrentAnimation();
     FastLED.show();
@@ -52,30 +53,28 @@ void loop() {
     // EVERY_N_MILLISECONDS(20) { animations->hueCounter++; } // slowly cycle the "base color" through the rainbow
 }
 
-// void readColorFromRemote() {
-//   client.println("s");
-//   if(client.available()) {
-//       char hueFromController[3];
-//       int readCount = 0;
-//       while(client.available()) {
-//           char c = client.read();
-//           hueFromController[readCount] = c;
-//           readCount++;
-//       }
-//       hueValue = atoi(hueFromController);
-//   }
-//   animations->hueCounter = hueValue;
-// }
+void readColorFromRemote() {
+   if(client.available()) {
+     hueValue = client.read() << 8 | client.read();
+     /*Serial.printlnf("Reading from remote: %d", hueValue);*/
+   }
+   while(client.read() != -1) {
+     /*Serial.println("Shelf lost bytes");*/
+   }
+   client.flush();
+   /*Serial.printlnf("Final from remote: %d", hueValue);*/
+   animations->hueCounter = hueValue;
+}
 
-// void connectToRemote() {
-//   if (client.connect(server, tcpPort)) {
-//       Serial.println("Connected");
-//       Particle.publish("Connected");
-//   } else {
-//       Serial.println("Connection failed");
-//       Particle.publish("Connection failed");
-//   }
-// }
+void connectToRemote() {
+ if (client.connect(server, tcpPort)) {
+     Serial.println("Connected");
+     Particle.publish("Connected");
+ } else {
+     Serial.println("Connection failed");
+     Particle.publish("Connection failed");
+ }
+}
 
 void setupModeFunctions() {
   Particle.function("nextMode", nextMode);
@@ -87,9 +86,9 @@ void setupModeFunctions() {
 
 int nextMode(String mode) {
     int currentPattern = animations->nextPattern();
-    /*char currentPatternString[5];
+    char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);*/
+    Particle.publish("Current Pattern", currentPatternString);
     return 1;
 }
 
@@ -99,9 +98,9 @@ void handleNextMode(const char *eventName, const char *data) {
 
 int previousMode(String mode) {
     int currentPattern = animations->previousPattern();
-    /*char currentPatternString[5];
+    char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);*/
+    Particle.publish("Current Pattern", currentPatternString);
     return 1;
 }
 
