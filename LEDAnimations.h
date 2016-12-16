@@ -56,9 +56,10 @@ class LEDAnimations
     void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
     void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
 
-    void waterfallBorderControllerToo(int frequencyValue, int sensitivityThreshold);
-    void waterfallBorderControllerOnly();
+    void waterfallBorderRemoteAndSpectrum(int frequencyValue, int sensitivityThreshold);
+    void waterfallBorderRemote();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
+    void waterfallRainbowBorder();
 
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
