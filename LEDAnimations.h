@@ -63,6 +63,7 @@ class LEDAnimations
 
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
+    void equalizerRightToLeftTopToBottom();
     void equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction);
     void equalizerRightBorder(int frequencyValue, int sensitivityThreshold, bool direction);
     void equalizerTopBorder(int frequencyValue, int sensitivityThreshold, bool direction);
