@@ -146,12 +146,4 @@ void Shelf::fillRight(CRGB color, int numToFill) {
   }
 }
 
-// void Shelf::fadeToBlackBy(45) {
-//   fadeToBlackBy(shelfStrip, LEDS_PER_SHELF, 45);
-// }
-
-// char currentPatternString[40];
-// sprintf(currentPatternString, "%d", left);
-// Particle.publish("settinstuff", currentPatternString);
-
 #endif

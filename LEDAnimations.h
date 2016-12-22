@@ -25,9 +25,9 @@ class LEDAnimations
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    int currentPattern;
+    uint8_t currentPattern;
     uint8_t numberOfPatterns;
-    uint8_t hueCounter;
+    int currentHue;
 
     LEDAnimations();
     LEDAnimations(SpectrumEqualizer* eq);

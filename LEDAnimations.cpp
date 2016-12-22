@@ -18,7 +18,7 @@ uint16_t globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
 uint8_t numberOfPatterns;
 uint8_t currentPattern = 0;
-uint8_t currentHue = 0;
+int currentHue = 0;
 
 typedef void (LEDAnimations::*AnimationList)();
 

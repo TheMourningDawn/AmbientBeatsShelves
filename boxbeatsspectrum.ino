@@ -46,7 +46,7 @@ void readColorFromRemote() {
    if(udpMulticast.parsePacket() > 0) {
      hueValue = udpMulticast.read() << 8 | udpMulticast.read();
    }
-   animations->hueCounter = hueValue;
+   animations->currentHue = hueValue;
 }
 
 void connectToRemote() {
