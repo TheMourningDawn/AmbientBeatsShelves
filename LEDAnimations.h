@@ -25,8 +25,8 @@ class LEDAnimations
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    uint8_t currentPattern;
     uint8_t numberOfPatterns;
+    int currentPattern;
     int currentHue;
 
     LEDAnimations();
@@ -53,14 +53,20 @@ class LEDAnimations
 
     void waterfall();
     void waterfallCascading();
-    void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
     void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
+    void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
+    void waterfallShelfRight(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);
+    void waterfallShelfLeft(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);
 
     void waterfallBorderRemoteAndSpectrum(int frequencyValue, int sensitivityThreshold);
     void waterfallBorderRemote();
     void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
     void waterfallRainbowBorder();
+    void waterfallRightToLeft();
+    void waterfallLeftToRight();
 
+    void equalizerBorderOnly();
+    void equalizerBorderOnlyReversed();
     void equalizerLeftToRightBottomToTop();
     void equalizerRightToLeftBottomToTop();
     void equalizerRightToLeftTopToBottom();

@@ -10,8 +10,8 @@
 
 #define BRIGHTNESS         200
 
-LEDAnimations *animations;
 SpectrumEqualizer *spectrum;
+LEDAnimations *animations;
 
 UDP udpMulticast;
 int udpPort = 47555;
@@ -21,16 +21,14 @@ int hueValue = 100;
 
 void setup() {
     /*Serial.begin(11520);*/
-    setupModeFunctions();
+    setupCloudModeFunctions();
     connectToRemote();
 
     spectrum = new SpectrumEqualizer();
     animations = new LEDAnimations(spectrum);
 
-    FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds , NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds, NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.addLeds<LED_TYPE, SHELF_LED_PIN, COLOR_ORDER>(animations->allShelves, NUM_SHELF_LEDS).setCorrection(TypicalLEDStrip);
-
-    animations->currentPattern = 0;
   }
 
 void loop() {
@@ -38,8 +36,11 @@ void loop() {
 
     animations->runCurrentAnimation();
     FastLED.show();
+}
 
-    // EVERY_N_MILLISECONDS(20) { animations->hueCounter++; } // slowly cycle the "base color" through the rainbow
+void connectToRemote() {
+   udpMulticast.begin(udpPort);
+   udpMulticast.joinMulticast(udpIP);
 }
 
 void readColorFromRemote() {
@@ -49,12 +50,7 @@ void readColorFromRemote() {
    animations->currentHue = hueValue;
 }
 
-void connectToRemote() {
-   udpMulticast.begin(udpPort);
-   udpMulticast.joinMulticast(udpIP);
-}
-
-void setupModeFunctions() {
+void setupCloudModeFunctions() {
     Particle.function("nextMode", nextMode);
     Particle.function("previousMode", previousMode);
 
