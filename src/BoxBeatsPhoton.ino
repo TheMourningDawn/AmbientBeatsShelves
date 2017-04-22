@@ -1,6 +1,5 @@
 #include "application.h"
 #include "LEDAnimations.h"
-#include "SpectrumEqualizer.h"
 
 #define BORDER_LED_PIN    D2
 #define SHELF_LED_PIN    D3
@@ -10,7 +9,6 @@
 
 #define BRIGHTNESS         200
 
-SpectrumEqualizer *spectrum;
 LEDAnimations *animations;
 
 UDP udpMulticast;
@@ -24,8 +22,7 @@ void setup() {
     setupCloudModeFunctions();
     connectToRemote();
 
-    spectrum = new SpectrumEqualizer();
-    animations = new LEDAnimations(spectrum);
+    animations = new LEDAnimations();
 
     FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds, NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.addLeds<LED_TYPE, SHELF_LED_PIN, COLOR_ORDER>(animations->allShelves, NUM_SHELF_LEDS).setCorrection(TypicalLEDStrip);

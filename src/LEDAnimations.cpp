@@ -12,8 +12,6 @@ Shelf *topShelf;
 Shelf *middleShelf;
 Shelf *bottomShelf;
 
-SpectrumEqualizer *equalizer;
-
 uint16_t globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
 uint8_t numberOfPatterns;
@@ -29,15 +27,9 @@ AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::rand
             &LEDAnimations::equalizerRightToLeftBottomToTop, &LEDAnimations::equalizerRightToLeftTopToBottom,
             &LEDAnimations::equalizerBorderOnly, &LEDAnimations::equalizerBorderOnlyReversed};
 
-LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
-    topShelf = new Shelf(allShelves, 39, 58);
-    middleShelf = new Shelf(allShelves, 38, 19);
-    bottomShelf = new Shelf(allShelves, 0, 18);
-    numberOfPatterns = ARRAY_SIZE(animationList) - 1;
-    currentPattern = 0;
-}
-
-LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
+//TODO: Rename to LEDController?
+//Interface?
+LEDAnimations::LEDAnimations() {
     topShelf = new Shelf(allShelves, 39, 58);
     middleShelf = new Shelf(allShelves, 38, 19);
     bottomShelf = new Shelf(allShelves, 0, 18);
@@ -46,121 +38,8 @@ LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
 }
 
 int LEDAnimations::runCurrentAnimation() {
-    equalizer->readAudioFrequencies();
+    readAudioFrequencies();
     (this->*animationList[currentPattern])();
-}
-
-int position = 0;
-boolean direction = true;
-String ledStripToUse = "border";
-void LEDAnimations::randomSilon() {
-    if(ledStripToUse == "border") {
-      borderLeds[position] = CHSV(currentHue, 255, 255);
-    }
-    else if(ledStripToUse == "shelf") {
-      allShelves[position] = CHSV(currentHue, 255, 255);
-    }
-    if(position == NUM_BORDER_LEDS) {
-       position = 18;
-       ledStripToUse = "shelf";
-       direction = false;
-    }
-    else if(position == 0 && ledStripToUse == "border" && direction == false) {
-       position = -1;
-       direction = true;
-       ledStripToUse = "shelf";
-    }
-    else if(position == 21 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
-            ledStripToUse = "shelf";
-            direction = false;
-            position = 38;
-        }
-    }
-    else if(position == 42 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
-            ledStripToUse = "shelf";
-            direction = true;
-            position = 38;
-        }
-    }
-    else if(position == 104 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
-            ledStripToUse = "shelf";
-            direction = false;
-            position = 58;
-        }
-    }
-    else if(position == 125 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
-            ledStripToUse = "shelf";
-            direction = true;
-            position = 19;
-        }
-    }
-    else if(position == 18 && ledStripToUse == "shelf" && direction == true) {
-      position = NUM_BORDER_LEDS - 1;
-      direction = false;
-      ledStripToUse = "border";
-    }
-    else if(position == 19 && ledStripToUse == "shelf" && direction == false) {
-        if(random8(10) > 4) {
-            ledStripToUse = "border";
-            direction = true;
-            position = 125;
-        } else {
-            ledStripToUse = "border";
-            direction = false;
-            position = 125;
-        }
-    }
-    else if(position == 0 && ledStripToUse == "shelf" && direction == false) {
-       position = -1;
-       direction = true;
-       ledStripToUse = "border";
-    }
-    else if(position == 39 && ledStripToUse == "shelf" && direction == false) {
-        if(random8(10) > 4) {
-            ledStripToUse = "border";
-            direction = true;
-            position = 42;
-        } else {
-          ledStripToUse = "border";
-          direction = false;
-          position = 42;
-        }
-    }
-    else if(position == 59-1 && ledStripToUse == "shelf" && direction == true) {
-        if(random8(10) > 4) {
-            ledStripToUse = "border";
-            direction = true;
-            position = 104;
-        } else {
-          ledStripToUse = "border";
-          direction = false;
-          position = 104;
-        }
-    }
-    else if(position == 38 && ledStripToUse == "shelf" && direction == true) {
-        if(random8(10) > 4) {
-            ledStripToUse = "border";
-            direction = true;
-            position = 21;
-        } else {
-          ledStripToUse = "border";
-          direction = false;
-          position = 21;
-        }
-    }
-    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 1);
-    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 1);
-    if(direction == true) {
-        position++;
-    } else {
-      position--;
-    }
-    if(position < 0) { position = 0; }
-    if(position > NUM_BORDER_LEDS) { position = NUM_BORDER_LEDS; };
 }
 
 int LEDAnimations::nextPattern() {
@@ -279,7 +158,7 @@ void LEDAnimations::bpm() {
 
 // eight colored dots, weaving in and out of sync with each other
 void LEDAnimations::juggle() {
-    int frequencyValue = equalizer->frequenciesLeft[frequencyMode[0]];
+    int frequencyValue = frequenciesLeft[frequencyMode[0]];
     uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 20);
@@ -301,10 +180,10 @@ void LEDAnimations::juggle() {
 void LEDAnimations::waterfall() {
     int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
     int brightness = 220;
-    waterfallShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelf(topShelf, frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+    waterfallShelf(middleShelf, frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+    waterfallShelf(bottomShelf, frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+    waterfallBorder(frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallShelf(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset) {
@@ -369,19 +248,19 @@ void LEDAnimations::waterfallBorderRemoteAndSpectrum(int frequencyValue, int fre
 void LEDAnimations::waterfallLeftToRight() {
   int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
   int brightness = 220;
-  waterfallShelfLeft(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-  waterfallShelfLeft(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-  waterfallShelfLeft(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-  waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+  waterfallShelfLeft(topShelf, frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+  waterfallShelfLeft(middleShelf, frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+  waterfallShelfLeft(bottomShelf, frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+  waterfallBorder(frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallRightToLeft() {
   int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
   int brightness = 220;
-  waterfallShelfRight(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-  waterfallShelfRight(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-  waterfallShelfRight(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-  waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+  waterfallShelfRight(topShelf, frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+  waterfallShelfRight(middleShelf, frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+  waterfallShelfRight(bottomShelf, frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+  waterfallBorder(frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallBorderRemote() {
@@ -401,48 +280,48 @@ void LEDAnimations::waterfallRainbowBorder() {
 void LEDAnimations::equalizerLeftToRightBottomToTop() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerLeftBorder(frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerTopBorder(frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerRightBorder(frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(topShelf, frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerShelf(middleShelf, frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerShelf(bottomShelf, frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), true);
 }
 
 void LEDAnimations::equalizerRightToLeftBottomToTop() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerLeftBorder(frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerTopBorder(frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerRightBorder(frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(topShelf, frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(middleShelf, frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(bottomShelf, frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerRightToLeftTopToBottom() {
   fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
   fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-  equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), true);
-  equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
-  equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), true);
-  equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
-  equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
-  equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerLeftBorder(frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), true);
+  equalizerTopBorder(frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerRightBorder(frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), true);
+  equalizerShelf(topShelf, frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerShelf(middleShelf, frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerShelf(bottomShelf, frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerBorderOnly() {
   fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
   fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 40);
-  equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-  equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerLeftBorder(frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerRightBorder(frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerBorderOnlyReversed() {
   fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
   fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 40);
-  equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-  equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerLeftBorder(frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+  equalizerRightBorder(frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction) {
@@ -511,6 +390,119 @@ void LEDAnimations::equalizerShelf(Shelf *shelf, int frequencyValue, int sensiti
           shelf->fillRight(color, numberToLight);
         }
     }
+}
+
+int position = 0;
+boolean direction = true;
+String ledStripToUse = "border";
+void LEDAnimations::randomSilon() {
+    if(ledStripToUse == "border") {
+      borderLeds[position] = CHSV(currentHue, 255, 255);
+    }
+    else if(ledStripToUse == "shelf") {
+      allShelves[position] = CHSV(currentHue, 255, 255);
+    }
+    if(position == NUM_BORDER_LEDS) {
+       position = 18;
+       ledStripToUse = "shelf";
+       direction = false;
+    }
+    else if(position == 0 && ledStripToUse == "border" && direction == false) {
+       position = -1;
+       direction = true;
+       ledStripToUse = "shelf";
+    }
+    else if(position == 21 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = false;
+            position = 38;
+        }
+    }
+    else if(position == 42 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = true;
+            position = 38;
+        }
+    }
+    else if(position == 104 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = false;
+            position = 58;
+        }
+    }
+    else if(position == 125 && ledStripToUse == "border") {
+        if(random8(10) > 4) {
+            ledStripToUse = "shelf";
+            direction = true;
+            position = 19;
+        }
+    }
+    else if(position == 18 && ledStripToUse == "shelf" && direction == true) {
+      position = NUM_BORDER_LEDS - 1;
+      direction = false;
+      ledStripToUse = "border";
+    }
+    else if(position == 19 && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 125;
+        } else {
+            ledStripToUse = "border";
+            direction = false;
+            position = 125;
+        }
+    }
+    else if(position == 0 && ledStripToUse == "shelf" && direction == false) {
+       position = -1;
+       direction = true;
+       ledStripToUse = "border";
+    }
+    else if(position == 39 && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 42;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 42;
+        }
+    }
+    else if(position == 59-1 && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 104;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 104;
+        }
+    }
+    else if(position == 38 && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 4) {
+            ledStripToUse = "border";
+            direction = true;
+            position = 21;
+        } else {
+          ledStripToUse = "border";
+          direction = false;
+          position = 21;
+        }
+    }
+    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 1);
+    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 1);
+    if(direction == true) {
+        position++;
+    } else {
+      position--;
+    }
+    if(position < 0) { position = 0; }
+    if(position > NUM_BORDER_LEDS) { position = NUM_BORDER_LEDS; };
 }
 
 #endif

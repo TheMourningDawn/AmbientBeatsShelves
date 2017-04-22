@@ -15,10 +15,9 @@ FASTLED_USING_NAMESPACE;
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
-class LEDAnimations
+class LEDAnimations : public SpectrumEqualizer
 {
   private:
-    SpectrumEqualizer *equalizer;
     Shelf *topShelf;
     Shelf *middleShelf;
     Shelf *bottomShelf;
@@ -26,11 +25,12 @@ class LEDAnimations
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
     uint8_t numberOfPatterns;
+    uint16_t globalSensitivity;
     int currentPattern;
     int currentHue;
 
+
     LEDAnimations();
-    LEDAnimations(SpectrumEqualizer* eq);
 
     int runCurrentAnimation();
     int nextPattern();
