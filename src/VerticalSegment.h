@@ -8,6 +8,7 @@ class VerticalSegment : public Segment
 {
   private:
     enum orientation : char;
+
   public:
     VerticalSegment();
     VerticalSegment(CRGB *segment, int firstLEDIndex, int lastLEDIndex, orientation verticalOrientation);

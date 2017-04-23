@@ -8,6 +8,8 @@ CRGB *segmentStrip;
 int firstLEDIndex;
 int lastLEDIndex;
 
+std::vector<Intersection> intersections;
+
 //TODO: Change the idea of a Shelf to a Segment
 // Sements will be given a strip in which the segment is contained
 // Segments will be given the led indexes indicating the begin and end
@@ -34,6 +36,30 @@ Segment::Segment() {}
 Segment::Segment(CRGB *segment, int firstLEDIndex, int lastLEDIndex) : segmentStrip(segment) {
   firstLEDIndex = firstLEDIndex;
   lastLEDIndex = lastLEDIndex;
+}
+
+void Segment::addIntersection(int localIntersectionIndex, Segment *intersectingSegment, int intersectionIndex) {
+  Intersection *intersectionToAdd = new Intersection(localIntersectionIndex, intersectingSegment, intersectionIndex);
+  intersections.push_back(intersectionToAdd);
+}
+
+std::vector<Intersection*> Segment::getIntersections() {
+  return intersections;
+}
+
+bool Segment::isIntersectionIndex(int index) {
+  // std::vector<Intersection> i;
+  // for(i=intersections.begin();i!=intersections.end();++i) {
+  //   // if(i == index) {
+  //     return true;
+  //   // }
+  // }
+  // return false;
+  return false;
+}
+
+Segment* Segment::getIntersectedSegment(int intersectionIndex) {
+  return intersections[intersectionIndex]->intersectingSegment;
 }
 
 int Segment::getFirstLEDIndex() {

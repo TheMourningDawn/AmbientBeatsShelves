@@ -28,6 +28,7 @@ VerticalSegment::VerticalSegment(CRGB *segment, int firstLEDIndex, int lastLEDIn
   segmentOrientation = segmentOrientation;
 }
 
+
 int VerticalSegment::getTopLEDIndex() {
   if(segmentOrientation == DATA_DOWN) {
     return getFirstLEDIndex();
