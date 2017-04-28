@@ -18,7 +18,7 @@ IPAddress udpIP(239,1,1,232);
 int hueValue = 100;
 
 void setup() {
-    /*Serial.begin(11520);*/
+    Serial.begin(11520);
     setupCloudModeFunctions();
     connectToRemote();
 
@@ -30,9 +30,13 @@ void setup() {
 
 void loop() {
     readColorFromRemote();
-
+    delay(5000);
+    char currentPatternString[5];
+    Serial.printf("%s\n", "Starting Animation");
     animations->runCurrentAnimation();
+    // CRGB fallOffColor = getColor(lastLEDIndex);
     FastLED.show();
+    Serial.printf("%s\n", "Done with Animation");
 }
 
 void connectToRemote() {
@@ -59,7 +63,7 @@ int nextMode(String mode) {
     int currentPattern = animations->nextPattern();
     char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Moved to nextMode", currentPatternString);
     return 1;
 }
 
@@ -71,7 +75,7 @@ int previousMode(String mode) {
     int currentPattern = animations->previousPattern();
     char currentPatternString[5];
     sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Move to previoiusMode", currentPatternString);
     return 1;
 }
 

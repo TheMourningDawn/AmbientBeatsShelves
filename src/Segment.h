@@ -2,7 +2,6 @@
 #define SEGMENT_H
 
 #include <vector>
-#include "Intersection.h"
 #include "application.h"
 #include "FastLED.h"
 

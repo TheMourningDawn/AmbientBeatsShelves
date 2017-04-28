@@ -3,15 +3,13 @@
 
 #include "application.h"
 #include "Segment.h"
+#include "VerticalOrientation.h"
 
 class VerticalSegment : public Segment
 {
-  private:
-    enum orientation : char;
-
   public:
     VerticalSegment();
-    VerticalSegment(CRGB *segment, int firstLEDIndex, int lastLEDIndex, orientation verticalOrientation);
+    VerticalSegment(CRGB *segment, int firstLEDIndex, int lastLEDIndex, VerticalOrientation::orientation verticalOrientation);
 
     int getTopLEDIndex();
     int getBottomLEDIndex();
@@ -19,11 +17,11 @@ class VerticalSegment : public Segment
     void setTopLEDColor(CRGB color);
     void setBottomLEDColor(CRGB color);
 
-    void getTopLEDColor();
-    void getBottomLEDColor();
+    CRGB getTopLEDColor();
+    CRGB getBottomLEDColor();
 
-    void shiftTowardTop();
-    void shiftTowardBottom();
+    CRGB shiftTowardTop();
+    CRGB shiftTowardBottom();
 
     void fillFromTop(CRGB color, int numberOfLEDToFIll);
     void fillFromBottom(CRGB color, int numberOfLEDToFIll);

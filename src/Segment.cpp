@@ -114,14 +114,16 @@ int Segment::length() {
 */
 //TODO: make sure this is going the correct direction...
 CRGB Segment::shiftTowardLast() {
-  CRGB fallOffColor = getColor(lastLEDIndex);
+  Serial.printf("%s\n", "About to memmove");
   memmove(&segmentStrip[firstLEDIndex+1], &segmentStrip[firstLEDIndex], (getSegmentLength()-1) * sizeof(CRGB));
-  return fallOffColor;
+  Serial.printf("%s\n", "Finshed with memmove");
+  return CRGB(255,76,98);
 }
 CRGB Segment::shiftTowardFirst() {
-  CRGB fallOffColor = getColor(firstLEDIndex);
+  // CRGB fallOffColor = getColor(firstLEDIndex);
   memmove(&segmentStrip[firstLEDIndex], &segmentStrip[firstLEDIndex+1], (getSegmentLength()-1) * sizeof(CRGB));
-  return fallOffColor;
+  return CRGB(255,76,98);
+  // return fallOffColor;
 }
 
 /**

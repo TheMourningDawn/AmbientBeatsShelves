@@ -4,7 +4,8 @@
 #include "application.h"
 #include "SpectrumEqualizer.h"
 #include "FastLED.h"
-#include "Shelf.h"
+#include "HorizontalSegment.h"
+#include "VerticalSegment.h"
 
 FASTLED_USING_NAMESPACE;
 
@@ -18,9 +19,13 @@ FASTLED_USING_NAMESPACE;
 class LEDAnimations : public SpectrumEqualizer
 {
   private:
-    Shelf *topShelf;
-    Shelf *middleShelf;
-    Shelf *bottomShelf;
+    HorizontalSegment *topBorder;
+    HorizontalSegment *topShelf;
+    HorizontalSegment *middleShelf;
+    HorizontalSegment *bottomShelf;
+
+    VerticalSegment *rightBorder;
+    VerticalSegment *leftBorder;
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
@@ -28,7 +33,7 @@ class LEDAnimations : public SpectrumEqualizer
     uint16_t globalSensitivity;
     int currentPattern;
     int currentHue;
-
+    bool modeReset;
 
     LEDAnimations();
 
@@ -45,35 +50,6 @@ class LEDAnimations : public SpectrumEqualizer
     void randomSilon();
 
     void clearAllLeds();
-    void rainbow();
-    void confetti();
-    void sinelon();
-    void bpm();
-    void juggle();
-
-    void waterfall();
-    void waterfallCascading();
-    void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
-    void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
-    void waterfallShelfRight(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);
-    void waterfallShelfLeft(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);
-
-    void waterfallBorderRemoteAndSpectrum(int frequencyValue, int sensitivityThreshold);
-    void waterfallBorderRemote();
-    void waterfallBorderCascading(int frequencyValue, int sensitivityThreshold);
-    void waterfallRainbowBorder();
-    void waterfallRightToLeft();
-    void waterfallLeftToRight();
-
-    void equalizerBorderOnly();
-    void equalizerBorderOnlyReversed();
-    void equalizerLeftToRightBottomToTop();
-    void equalizerRightToLeftBottomToTop();
-    void equalizerRightToLeftTopToBottom();
-    void equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction);
-    void equalizerRightBorder(int frequencyValue, int sensitivityThreshold, bool direction);
-    void equalizerTopBorder(int frequencyValue, int sensitivityThreshold, bool direction);
-    void equalizerShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, bool direction);
 };
 
 #endif
