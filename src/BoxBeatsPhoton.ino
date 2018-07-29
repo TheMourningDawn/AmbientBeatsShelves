@@ -8,7 +8,7 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
-#define BRIGHTNESS         200
+#define BRIGHTNESS 200
 
 SpectrumEqualizer *spectrum;
 LEDAnimations *animations;
@@ -17,7 +17,7 @@ UDP udpMulticast;
 int udpPort = 47555;
 IPAddress udpIP(239,1,1,232);
 
-int hueValue = 100;
+int hueValue = 200;
 
 void setup() {
     /*Serial.begin(11520);*/
@@ -53,6 +53,7 @@ void readColorFromRemote() {
 void setupCloudModeFunctions() {
     Particle.function("nextMode", nextMode);
     Particle.function("previousMode", previousMode);
+    Particle.function("setColor", setColor);
 
     Particle.subscribe("NEXT_MODE", handleNextMode);
     Particle.subscribe("PREVIOUS_MODE", handlePreviousMode);
@@ -80,4 +81,37 @@ int previousMode(String mode) {
 
 void handlePreviousMode(const char *eventName, const char *data) {
     previousMode("seriouslyWhy?");
+}
+
+//Expects rgb values to be in r,g,b format e.g. 140,200,90
+int setColor(String rgbString) {
+   char buffer[12];
+   rgbString.toCharArray(buffer, 12);
+   String r = "";
+   String g = "";
+   String b = "";
+
+   int rgbItem = 0;
+   for(int i=0;i<12;i++) {
+     if(buffer[i] != ',') {
+       if(rgbItem == 0) {
+         r.concat(buffer[i]);
+       }
+       if(rgbItem == 1) {
+         g.concat(buffer[i]);
+       }
+       if(rgbItem == 2) {
+         b.concat(buffer[i]);
+       }
+     } else {
+       rgbItem++;
+     }
+   }
+
+   CRGB rgb = CRGB(r.toInt(),g.toInt(),b.toInt());
+   CHSV hsv = rgb2hsv_approximate(rgb);
+
+   hueValue = hsv.hue;
+
+   return 1;
 }

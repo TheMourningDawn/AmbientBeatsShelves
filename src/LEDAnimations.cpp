@@ -30,17 +30,17 @@ AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::rand
             &LEDAnimations::equalizerBorderOnly, &LEDAnimations::equalizerBorderOnlyReversed};
 
 LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
-    topShelf = new Shelf(allShelves, 39, 58);
-    middleShelf = new Shelf(allShelves, 38, 19);
-    bottomShelf = new Shelf(allShelves, 0, 18);
+    topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
+    middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
+    bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
     numberOfPatterns = ARRAY_SIZE(animationList) - 1;
     currentPattern = 0;
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
-    topShelf = new Shelf(allShelves, 39, 58);
-    middleShelf = new Shelf(allShelves, 38, 19);
-    bottomShelf = new Shelf(allShelves, 0, 18);
+    topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
+    middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
+    bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
     numberOfPatterns = ARRAY_SIZE(animationList) - 1;
     currentPattern = 0;
 }
@@ -61,50 +61,50 @@ void LEDAnimations::randomSilon() {
       allShelves[position] = CHSV(currentHue, 255, 255);
     }
     if(position == NUM_BORDER_LEDS) {
-       position = 18;
+       position = BOTTOM_SHELF_RIGHT;
        ledStripToUse = "shelf";
        direction = false;
     }
-    else if(position == 0 && ledStripToUse == "border" && direction == false) {
+    else if(position == BOTTOM_SHELF_LEFT && ledStripToUse == "border" && direction == false) {
        position = -1;
        direction = true;
        ledStripToUse = "shelf";
     }
     else if(position == 21 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
+        if(random8(10) > 5) {
             ledStripToUse = "shelf";
             direction = false;
-            position = 38;
+            position = MIDDLE_SHELF_LEFT;
         }
     }
     else if(position == 42 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
+        if(random8(10) > 5) {
             ledStripToUse = "shelf";
             direction = true;
-            position = 38;
+            position = TOP_SHELF_LEFT;
         }
     }
     else if(position == 104 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
+        if(random8(10) > 5) {
             ledStripToUse = "shelf";
             direction = false;
-            position = 58;
+            position = TOP_SHELF_RIGHT;
         }
     }
     else if(position == 125 && ledStripToUse == "border") {
-        if(random8(10) > 4) {
+        if(random8(10) > 5) {
             ledStripToUse = "shelf";
             direction = true;
-            position = 19;
+            position = MIDDLE_SHELF_RIGHT;
         }
     }
-    else if(position == 18 && ledStripToUse == "shelf" && direction == true) {
+    else if(position == BOTTOM_SHELF_RIGHT && ledStripToUse == "shelf" && direction == true) {
       position = NUM_BORDER_LEDS - 1;
       direction = false;
       ledStripToUse = "border";
     }
-    else if(position == 19 && ledStripToUse == "shelf" && direction == false) {
-        if(random8(10) > 4) {
+    else if(position == MIDDLE_SHELF_RIGHT && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 5) {
             ledStripToUse = "border";
             direction = true;
             position = 125;
@@ -114,13 +114,13 @@ void LEDAnimations::randomSilon() {
             position = 125;
         }
     }
-    else if(position == 0 && ledStripToUse == "shelf" && direction == false) {
+    else if(position == BOTTOM_SHELF_LEFT && ledStripToUse == "shelf" && direction == false) {
        position = -1;
        direction = true;
        ledStripToUse = "border";
     }
-    else if(position == 39 && ledStripToUse == "shelf" && direction == false) {
-        if(random8(10) > 4) {
+    else if(position == TOP_SHELF_LEFT && ledStripToUse == "shelf" && direction == false) {
+        if(random8(10) > 5) {
             ledStripToUse = "border";
             direction = true;
             position = 42;
@@ -130,8 +130,8 @@ void LEDAnimations::randomSilon() {
           position = 42;
         }
     }
-    else if(position == 59-1 && ledStripToUse == "shelf" && direction == true) {
-        if(random8(10) > 4) {
+    else if(position == TOP_SHELF_RIGHT && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 5) {
             ledStripToUse = "border";
             direction = true;
             position = 104;
@@ -141,8 +141,8 @@ void LEDAnimations::randomSilon() {
           position = 104;
         }
     }
-    else if(position == 38 && ledStripToUse == "shelf" && direction == true) {
-        if(random8(10) > 4) {
+    else if(position == MIDDLE_SHELF_LEFT && ledStripToUse == "shelf" && direction == true) {
+        if(random8(10) > 5) {
             ledStripToUse = "border";
             direction = true;
             position = 21;
