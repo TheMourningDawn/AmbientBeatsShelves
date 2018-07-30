@@ -19,13 +19,15 @@ uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
 uint8_t numberOfPatterns;
 int currentPattern;
 int currentHue = 0;
+int currentSaturation = 200;
+int currentBrightness = 255;
 
 typedef void (LEDAnimations::*AnimationList)();
 
 AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::randomSilon,
+            &LEDAnimations::confetti, &LEDAnimations::juggle, &LEDAnimations::rainbow,
             &LEDAnimations::waterfallBorderRemote, &LEDAnimations::waterfallRainbowBorder,
-            &LEDAnimations::waterfallLeftToRight, &LEDAnimations::waterfallRightToLeft,&LEDAnimations::confetti,
-            &LEDAnimations::juggle, &LEDAnimations::rainbow, &LEDAnimations::equalizerLeftToRightBottomToTop,
+            &LEDAnimations::waterfallLeftToRight, &LEDAnimations::waterfallRightToLeft, &LEDAnimations::equalizerLeftToRightBottomToTop,
             &LEDAnimations::equalizerRightToLeftBottomToTop, &LEDAnimations::equalizerRightToLeftTopToBottom,
             &LEDAnimations::equalizerBorderOnly, &LEDAnimations::equalizerBorderOnlyReversed};
 
@@ -55,10 +57,10 @@ boolean direction = true;
 String ledStripToUse = "border";
 void LEDAnimations::randomSilon() {
     if(ledStripToUse == "border") {
-      borderLeds[position] = CHSV(currentHue, 255, 255);
+      borderLeds[position] = CHSV(currentHue, currentSaturation, currentBrightness);
     }
     else if(ledStripToUse == "shelf") {
-      allShelves[position] = CHSV(currentHue, 255, 255);
+      allShelves[position] = CHSV(currentHue, currentSaturation, currentBrightness);
     }
     if(position == NUM_BORDER_LEDS) {
        position = BOTTOM_SHELF_RIGHT;
@@ -177,6 +179,18 @@ int LEDAnimations::previousPattern() {
     return currentPattern;
 }
 
+int LEDAnimations::getCurrentPattern() {
+  return currentPattern;
+}
+
+void LEDAnimations::setCurrentBrightness(int brightness) {
+  currentBrightness = brightness;
+}
+
+void LEDAnimations::setCurrentSaturation(int saturation) {
+  currentSaturation = saturation;
+}
+
 void LEDAnimations::nextFrequencyMode() {
     int wrapEnd = frequencyMode[6];
     for(int i=6;i>0;i--) {
@@ -240,41 +254,11 @@ void LEDAnimations::confetti() {
 
     // if (frequencyValue > frequencyThreshold) {
         if (position > NUM_BORDER_LEDS) {
-            allShelves[position % NUM_BORDER_LEDS] += CHSV(currentHue + random8(64), 200, 255);
+            allShelves[position % NUM_BORDER_LEDS] += CHSV(currentHue + random8(64), currentSaturation, currentBrightness);
         } else {
-            borderLeds[position] += CHSV(currentHue + random8(64), 200, 255);
+            borderLeds[position] += CHSV(currentHue + random8(64), currentSaturation, currentBrightness);
         }
     // }
-}
-
-// a colored dot sweeping back and forth, with fading trails
-void LEDAnimations::sinelon() {
-    uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
-
-    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 5);
-    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 5);
-    int pos = beatsin16(13, 0, NUM_TOTAL_LEDS);
-    // if (frequencyValue > frequencyThreshold) {
-        if (pos > NUM_BORDER_LEDS) {
-            allShelves[pos % NUM_BORDER_LEDS] += CHSV(currentHue, 255, 192);
-        } else {
-            borderLeds[pos] += CHSV(currentHue, 255, 192);
-        }
-    // }
-}
-
-// colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-void LEDAnimations::bpm() {
-    uint8_t BeatsPerMinute = 120;
-    CRGBPalette16 palette = PartyColors_p;
-    uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
-    for (int i = 0; i < NUM_TOTAL_LEDS; i++) { //9948
-        if (i > NUM_BORDER_LEDS) {
-            allShelves[i] = ColorFromPalette(palette, currentHue + (i * 2), beat - currentHue + (i * 10));
-        } else {
-            borderLeds[i]= ColorFromPalette(palette, currentHue + (i * 2), beat - currentHue + (i * 10));
-        }
-    }
 }
 
 // eight colored dots, weaving in and out of sync with each other
@@ -285,17 +269,17 @@ void LEDAnimations::juggle() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 20);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 20);
     byte dothue = 0;
-    if (frequencyValue > frequencyThreshold) {
+    // if (frequencyValue > frequencyThreshold) {
         for (int i = 0; i < 8; i++) {
             int currentLocation = beatsin16(i + 7, 0, NUM_TOTAL_LEDS);
             if(currentLocation > NUM_BORDER_LEDS) {
-                allShelves[currentLocation % NUM_BORDER_LEDS] |= CHSV(dothue, 200, 255);
+                allShelves[currentLocation % NUM_BORDER_LEDS] |= CHSV(dothue, currentSaturation, currentBrightness);
             } else {
-                borderLeds[currentLocation] |= CHSV(dothue, 200, 255);
+                borderLeds[currentLocation] |= CHSV(dothue, currentSaturation, currentBrightness);
             }
             dothue += 32;
         }
-    }
+    // }
 }
 
 void LEDAnimations::waterfall() {

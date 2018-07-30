@@ -35,9 +35,16 @@ class LEDAnimations
     uint8_t numberOfPatterns;
     int currentPattern;
     int currentHue;
+    int currentSaturation;
+    int currentBrightness;
 
     LEDAnimations();
     LEDAnimations(SpectrumEqualizer* eq);
+
+    int getCurrentPattern();
+
+    void setCurrentBrightness(int brightness);
+    void setCurrentSaturation(int saturation);
 
     int runCurrentAnimation();
     int nextPattern();
@@ -54,8 +61,6 @@ class LEDAnimations
     void clearAllLeds();
     void rainbow();
     void confetti();
-    void sinelon();
-    void bpm();
     void juggle();
 
     void waterfall();

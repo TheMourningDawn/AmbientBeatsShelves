@@ -13,6 +13,8 @@
 SpectrumEqualizer *spectrum;
 LEDAnimations *animations;
 
+bool poweredOn = true;
+
 UDP udpMulticast;
 int udpPort = 47555;
 IPAddress udpIP(239,1,1,232);
@@ -32,10 +34,12 @@ void setup() {
   }
 
 void loop() {
-    readColorFromRemote();
+    if(poweredOn) {
+      readColorFromRemote();
 
-    animations->runCurrentAnimation();
-    FastLED.show();
+      animations->runCurrentAnimation();
+      FastLED.show();
+    }
 }
 
 void connectToRemote() {
@@ -55,15 +59,50 @@ void setupCloudModeFunctions() {
     Particle.function("previousMode", previousMode);
     Particle.function("setColor", setColor);
 
+    // Going toward dash delimited names for functions!
+    Particle.function("set-saturation", setSaturation);
+    Particle.function("set-brightness", setBrightness);
+    Particle.function("reset-device", resetDevice);
+    Particle.function("enter-safe-mode", enterSafeMode);
+    Particle.function("power-on", powerOn);
+    Particle.function("power-off", powerOff);
+
+    Particle.variable("current_hue", &hueValue, INT);
+
     Particle.subscribe("NEXT_MODE", handleNextMode);
     Particle.subscribe("PREVIOUS_MODE", handlePreviousMode);
 }
 
+int resetDevice(String arg) {
+   System.reset();
+
+   return 1;
+}
+
+int enterSafeMode(String arg) {
+  System.enterSafeMode();
+
+  return 1;
+}
+
+int powerOn(String arg) {
+    poweredOn = true;
+
+    return 1;
+}
+
+int powerOff(String arg) {
+  poweredOn = false;
+
+  animations->clearAllLeds();
+  FastLED.show();
+
+  return 1;
+}
+
 int nextMode(String mode) {
     int currentPattern = animations->nextPattern();
-    char currentPatternString[5];
-    sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Current Pattern", String(currentPattern));
     return 1;
 }
 
@@ -73,9 +112,7 @@ void handleNextMode(const char *eventName, const char *data) {
 
 int previousMode(String mode) {
     int currentPattern = animations->previousPattern();
-    char currentPatternString[5];
-    sprintf(currentPatternString, "%i", currentPattern);
-    Particle.publish("Current Pattern", currentPatternString);
+    Particle.publish("Current Pattern", String(currentPattern));
     return 1;
 }
 
@@ -96,11 +133,9 @@ int setColor(String rgbString) {
      if(buffer[i] != ',') {
        if(rgbItem == 0) {
          r.concat(buffer[i]);
-       }
-       if(rgbItem == 1) {
+       } else if(rgbItem == 1) {
          g.concat(buffer[i]);
-       }
-       if(rgbItem == 2) {
+       } else if(rgbItem == 2) {
          b.concat(buffer[i]);
        }
      } else {
@@ -114,4 +149,16 @@ int setColor(String rgbString) {
    hueValue = hsv.hue;
 
    return 1;
+}
+
+int setSaturation(String saturationString) {
+  animations->setCurrentSaturation(saturationString.toInt());
+
+  return 1;
+}
+
+int setBrightness(String brightnessString) {
+  animations->setCurrentBrightness(brightnessString.toInt());
+
+  return 1;
 }
