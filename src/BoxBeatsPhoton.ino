@@ -71,12 +71,13 @@ void setupCloudModeFunctions() {
 
     Particle.subscribe("NEXT_MODE", handleNextMode);
     Particle.subscribe("PREVIOUS_MODE", handlePreviousMode);
+    Particle.subscribe("RESET", handleReset);
 }
 
 int resetDevice(String arg) {
    System.reset();
 
-   return 1;
+   return 0;
 }
 
 int enterSafeMode(String arg) {
@@ -118,6 +119,10 @@ int previousMode(String mode) {
 
 void handlePreviousMode(const char *eventName, const char *data) {
     previousMode("seriouslyWhy?");
+}
+
+void handleReset(const char *eventName, const char *data) {
+  resetDevice("whatever");
 }
 
 //Expects rgb values to be in r,g,b format e.g. 140,200,90
