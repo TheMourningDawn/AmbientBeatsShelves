@@ -17,14 +17,11 @@ SpectrumEqualizer *equalizer;
 uint16_t globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
 uint8_t numberOfPatterns;
-int currentPattern;
-int currentHue = 0;
-int currentSaturation = 200;
-int currentBrightness = 255;
 
 typedef void (LEDAnimations::*AnimationList)();
 
 AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::randomSilon,
+            &LEDAnimations::fillColor, &LEDAnimations::colorBump, &LEDAnimations::seizureCity, &LEDAnimations:: flashyBump,
             &LEDAnimations::confetti, &LEDAnimations::juggle, &LEDAnimations::rainbow,
             &LEDAnimations::waterfallBorderRemote, &LEDAnimations::waterfallRainbowBorder,
             &LEDAnimations::waterfallLeftToRight, &LEDAnimations::waterfallRightToLeft, &LEDAnimations::equalizerLeftToRightBottomToTop,
@@ -36,7 +33,6 @@ LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
     numberOfPatterns = ARRAY_SIZE(animationList) - 1;
-    currentPattern = 0;
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
@@ -44,7 +40,6 @@ LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
     numberOfPatterns = ARRAY_SIZE(animationList) - 1;
-    currentPattern = 0;
 }
 
 int LEDAnimations::runCurrentAnimation() {
@@ -179,6 +174,12 @@ int LEDAnimations::previousPattern() {
     return currentPattern;
 }
 
+int LEDAnimations::setPattern(int patternNumber) {
+    currentPattern = wrapToRange(patternNumber, 0, numberOfPatterns);
+    clearAllLeds();
+    return currentPattern;
+}
+
 int LEDAnimations::getCurrentPattern() {
   return currentPattern;
 }
@@ -191,20 +192,24 @@ void LEDAnimations::setCurrentSaturation(int saturation) {
   currentSaturation = saturation;
 }
 
-void LEDAnimations::nextFrequencyMode() {
+int LEDAnimations::nextFrequencyMode() {
     int wrapEnd = frequencyMode[6];
     for(int i=6;i>0;i--) {
         frequencyMode[i] = frequencyMode[i-1];
     }
     frequencyMode[0] = wrapEnd;
+
+    return wrapEnd;
 }
 
-void LEDAnimations::previousFrequencyMode() {
+int LEDAnimations::previousFrequencyMode() {
     int wrapBegining = frequencyMode[0];
     for(int i=0;i<6;i++) {
         frequencyMode[i] = frequencyMode[i+1];
     }
     frequencyMode[6] = wrapBegining;
+
+    return wrapBegining;
 }
 
 int LEDAnimations::clampToRange(int numberToClamp, int lowerBound, int upperBound) {
@@ -238,8 +243,12 @@ void LEDAnimations::clearAllLeds() {
   }
 }
 
+void LEDAnimations::fillColor() {
+    fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(currentHue, currentSaturation, currentBrightness));
+    fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(currentHue, currentSaturation, currentBrightness));
+}
+
 void LEDAnimations::rainbow() {
-    // fill_rainbow(borderLeds, NUM_TOTAL_LEDS, currentHue, 7);
     fill_rainbow(borderLeds, NUM_BORDER_LEDS, currentHue, 7);
     fill_rainbow(allShelves, NUM_SHELF_LEDS, currentHue, 7);
 }
@@ -280,6 +289,42 @@ void LEDAnimations::juggle() {
             dothue += 32;
         }
     // }
+}
+
+int previousBrightness = 0;
+void LEDAnimations::colorBump() {
+    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], 500, 3800, 0, 255);
+
+    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 5);
+    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 5);
+
+    if(thisBrightness > previousBrightness) {
+        fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+        fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+    }
+}
+
+void LEDAnimations::flashyBump() {
+    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], 0, 3800, 0, 255);
+
+    fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+    fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+}
+
+void LEDAnimations::seizureCity() {
+    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], globalSensitivity, 3200, 0, 255);
+    if(thisBrightness > 240) {
+        currentHue += 20;
+        wrapToRange(currentHue+=20, 0, 255);
+    }
+
+    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 2);
+    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 2);
+
+    if(thisBrightness > previousBrightness) {
+        fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+        fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
+    }
 }
 
 void LEDAnimations::waterfall() {

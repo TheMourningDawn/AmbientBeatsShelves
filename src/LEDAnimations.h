@@ -33,10 +33,11 @@ class LEDAnimations
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
     uint8_t numberOfPatterns;
-    int currentPattern;
-    int currentHue;
-    int currentSaturation;
-    int currentBrightness;
+    int globalSensitivity = 0;
+    int currentPattern = 0;
+    int currentHue = 120;
+    int currentSaturation = 255;
+    int currentBrightness = 255;
 
     LEDAnimations();
     LEDAnimations(SpectrumEqualizer* eq);
@@ -49,8 +50,9 @@ class LEDAnimations
     int runCurrentAnimation();
     int nextPattern();
     int previousPattern();
-    void nextFrequencyMode();
-    void previousFrequencyMode();
+    int setPattern(int patternNumber);
+    int nextFrequencyMode();
+    int previousFrequencyMode();
 
     int clampToRange(int numberToClamp, int lowerBound, int upperBound);
     int clampSensitivity(int sensitivity);
@@ -59,9 +61,14 @@ class LEDAnimations
     void randomSilon();
 
     void clearAllLeds();
+    void fillColor();
     void rainbow();
     void confetti();
     void juggle();
+
+    void colorBump();
+    void seizureCity();
+    void flashyBump();
 
     void waterfall();
     void waterfallCascading();
