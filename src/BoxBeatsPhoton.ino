@@ -8,27 +8,27 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
-SpectrumEqualizer *spectrum;
+SpectrumEqualizer *audioEqualizer;
 LEDAnimations *animations;
-
-bool poweredOn = true;
 
 UDP udpMulticast;
 int udpPort = 47555;
 IPAddress udpIP(239,1,1,232);
 
-int hueValue = 200;
-int saturationValue = 0;
-int brightnessValue = 0;
-int modeValue = 0;
-int sensitivityValue = 0;
+bool poweredOn = true;
+
+int hue = 200;
+int saturation = 0;
+int brightness = 0;
+int animation = 0;
+int audioSensitivity = 0;
 
 void setup() {
     setupCloudModeFunctions();
     connectToRemote();
 
-    spectrum = new SpectrumEqualizer();
-    animations = new LEDAnimations(spectrum);
+    audioEqualizer = new SpectrumEqualizer();
+    animations = new LEDAnimations(audioEqualizer);
 
     FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds, NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.addLeds<LED_TYPE, SHELF_LED_PIN, COLOR_ORDER>(animations->allShelves, NUM_SHELF_LEDS).setCorrection(TypicalLEDStrip);
@@ -51,23 +51,22 @@ void connectToRemote() {
 
 void readColorFromRemote() {
    if(udpMulticast.parsePacket() > 0) {
-     hueValue = udpMulticast.read() << 8 | udpMulticast.read();
+       animations->currentHue = udpMulticast.read() << 8 | udpMulticast.read();
    }
-   animations->currentHue = hueValue;
 }
 
 void readCurrentValues() {
-    hueValue = animations->currentHue;
-    saturationValue = animations->currentSaturation;
-    brightnessValue = animations->currentBrightness;
-    modeValue = animations->currentPattern;
-    sensitivityValue = animations->globalSensitivity;
+    hue = animations->currentHue;
+    saturation = animations->currentSaturation;
+    brightness = animations->currentBrightness;
+    animation = animations->currentAnimation;
+    audioSensitivity = animations->globalSensitivity;
 }
 
 void setupCloudModeFunctions() {
-    Particle.function("next-mode", nextMode);
-    Particle.function("previous-mode", previousMode);
-    Particle.function("set-mode", setPattern);
+    Particle.function("next-animation", nextAnimation);
+    Particle.function("previous-animation", previousAnimation);
+    Particle.function("set-animation", setAnimation);
 
     Particle.function("next-frequency", nextFrequency);
     Particle.function("previous-frequency", previousFrequency);
@@ -85,13 +84,13 @@ void setupCloudModeFunctions() {
     Particle.function("power-off", powerOff);
     Particle.function("pause", pause);
 
-    Particle.variable("current-hue", &hueValue, INT);
-    Particle.variable("current-brightness", &brightnessValue, INT);
-    Particle.variable("current-saturation", &saturationValue, INT);
-    Particle.variable("current-pattern", &modeValue, INT);
+    Particle.variable("current-hue", &hue, INT);
+    Particle.variable("current-brightness", &brightness, INT);
+    Particle.variable("current-saturation", &saturation, INT);
+    Particle.variable("current-animation", &animation, INT);
 
-    Particle.subscribe("NEXT_MODE", handleNextMode);
-    Particle.subscribe("PREVIOUS_MODE", handlePreviousMode);
+    Particle.subscribe("NEXT_MODE", handleNextAnimation);
+    Particle.subscribe("PREVIOUS_MODE", handlePreviousAnimation);
     Particle.subscribe("RESET", handleReset);
 }
 
@@ -99,6 +98,10 @@ int resetDevice(String arg) {
    System.reset();
 
    return 0;
+}
+
+void handleReset(const char *eventName, const char *data) {
+    resetDevice("whatever");
 }
 
 int enterSafeMode(String arg) {
@@ -128,30 +131,30 @@ int pause(String arg) {
     return 1;
 }
 
-int nextMode(String mode) {
-    int currentPattern = animations->nextPattern();
-    Particle.publish("Current Pattern", String(currentPattern));
-    return currentPattern;
+int nextAnimation(String arg) {
+    int currentAnimation = animations->nextAnimation();
+    Particle.publish("Animation #", String(currentAnimation));
+    return currentAnimation;
 }
 
-void handleNextMode(const char *eventName, const char *data) {
-    nextMode("notSureWhyIHaveToDoItLikeThis");
+void handleNextAnimation(const char *eventName, const char *data) {
+    nextAnimation("notSureWhyIHaveToDoItLikeThis");
 }
 
-int previousMode(String mode) {
-    int currentPattern = animations->previousPattern();
-    Particle.publish("Current Pattern", String(currentPattern));
-    return currentPattern;
+int previousAnimation(String arg) {
+    int currentAnimation = animations->previousAnimation();
+    Particle.publish("Animation #", String(currentAnimation));
+    return currentAnimation;
 }
 
-void handlePreviousMode(const char *eventName, const char *data) {
-    previousMode("seriouslyWhy?");
+void handlePreviousAnimation(const char *eventName, const char *data) {
+    previousAnimation("seriouslyWhy?");
 }
 
-int setPattern(String mode) {
-    int currentPattern = animations->setPattern(mode.toInt());
-    Particle.publish("Current Pattern", String(currentPattern));
-    return currentPattern;
+int setAnimation(String animationNumber) {
+    int currentAnimation = animations->setAnimation(animationNumber.toInt());
+    Particle.publish("Animation #", String(currentAnimation));
+    return currentAnimation;
 }
 
 int nextFrequency(String frequency) {
@@ -164,10 +167,6 @@ int previousFrequency(String frequency) {
     int frequencyMode = animations->previousFrequencyMode();
 
     return frequencyMode;
-}
-
-void handleReset(const char *eventName, const char *data) {
-  resetDevice("whatever");
 }
 
 //Expects rgb values to be in r,g,b format e.g. 140,200,90
@@ -196,17 +195,17 @@ int setColor(String rgbString) {
    CRGB rgb = CRGB(r.toInt(),g.toInt(),b.toInt());
    CHSV hsv = rgb2hsv_approximate(rgb);
 
-   hueValue = hsv.hue;
-   animations->currentHue = hueValue;
+   hue = hsv.hue;
+   animations->currentHue = hue;
 
-    return hueValue;
+    return hue;
 }
 
-int setHue(String hue) {
-    hueValue = hue.toInt();
-    animations->currentHue = hueValue;
+int setHue(String newHue) {
+    hue = newHue.toInt();
+    animations->currentHue = hue;
 
-    return hueValue;
+    return hue;
 }
 
 int setSaturation(String saturationString) {

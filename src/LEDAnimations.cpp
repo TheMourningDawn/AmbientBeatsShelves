@@ -16,9 +16,11 @@ SpectrumEqualizer *equalizer;
 
 uint16_t globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
-uint8_t numberOfPatterns;
 
 typedef void (LEDAnimations::*AnimationList)();
+
+AnimationList  animations[] {};
+AnimationList  animationsMusicReactive[] {};
 
 AnimationList animationList[] = {&LEDAnimations::waterfall, &LEDAnimations::randomSilon,
             &LEDAnimations::fillColor, &LEDAnimations::colorBump, &LEDAnimations::seizureCity, &LEDAnimations:: flashyBump,
@@ -32,19 +34,19 @@ LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
     topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
-    numberOfPatterns = ARRAY_SIZE(animationList) - 1;
+    numberOfAnimations = ARRAY_SIZE(animationList) - 1;
 }
 
 LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
     topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
-    numberOfPatterns = ARRAY_SIZE(animationList) - 1;
+    numberOfAnimations = ARRAY_SIZE(animationList) - 1;
 }
 
 int LEDAnimations::runCurrentAnimation() {
     equalizer->readAudioFrequencies();
-    (this->*animationList[currentPattern])();
+    (this->*animationList[currentAnimation])();
 }
 
 int position = 0;
@@ -160,28 +162,28 @@ void LEDAnimations::randomSilon() {
     if(position > NUM_BORDER_LEDS) { position = NUM_BORDER_LEDS; };
 }
 
-int LEDAnimations::nextPattern() {
-    currentPattern++;
-    currentPattern = wrapToRange(currentPattern, 0, numberOfPatterns);
+int LEDAnimations::nextAnimation() {
+    currentAnimation++;
+    currentAnimation = wrapToRange(currentAnimation, 0, numberOfAnimations);
     clearAllLeds();
-    return currentPattern;
+    return currentAnimation;
 }
 
-int LEDAnimations::previousPattern() {
-    currentPattern--;
-    currentPattern = wrapToRange(currentPattern, 0, numberOfPatterns);
+int LEDAnimations::previousAnimation() {
+    currentAnimation--;
+    currentAnimation = wrapToRange(currentAnimation, 0, numberOfAnimations);
     clearAllLeds();
-    return currentPattern;
+    return currentAnimation;
 }
 
-int LEDAnimations::setPattern(int patternNumber) {
-    currentPattern = wrapToRange(patternNumber, 0, numberOfPatterns);
+int LEDAnimations::setAnimation(int animationNumber) {
+    currentAnimation = wrapToRange(animationNumber, 0, numberOfAnimations);
     clearAllLeds();
-    return currentPattern;
+    return currentAnimation;
 }
 
-int LEDAnimations::getCurrentPattern() {
-  return currentPattern;
+int LEDAnimations::getCurrentAnimation() {
+  return currentAnimation;
 }
 
 void LEDAnimations::setCurrentBrightness(int brightness) {

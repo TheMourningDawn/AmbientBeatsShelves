@@ -32,9 +32,9 @@ class LEDAnimations
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
-    uint8_t numberOfPatterns;
+    uint8_t numberOfAnimations;
     int globalSensitivity = 0;
-    int currentPattern = 0;
+    int currentAnimation = 0;
     int currentHue = 120;
     int currentSaturation = 255;
     int currentBrightness = 255;
@@ -42,15 +42,15 @@ class LEDAnimations
     LEDAnimations();
     LEDAnimations(SpectrumEqualizer* eq);
 
-    int getCurrentPattern();
+    int getCurrentAnimation();
 
     void setCurrentBrightness(int brightness);
     void setCurrentSaturation(int saturation);
 
     int runCurrentAnimation();
-    int nextPattern();
-    int previousPattern();
-    int setPattern(int patternNumber);
+    int nextAnimation();
+    int previousAnimation();
+    int setAnimation(int animationNumber);
     int nextFrequencyMode();
     int previousFrequencyMode();
 
