@@ -64,19 +64,20 @@ void readCurrentValues() {
 }
 
 void setupCloudModeFunctions() {
+    // Up to 15 cloud functions may be registered and each function name is limited to a maximum of 12 characters.
+    Particle.function("toggle-audio-reactive", toggleAudioReactive);
+
     Particle.function("next-animation", nextAnimation);
     Particle.function("previous-animation", previousAnimation);
     Particle.function("set-animation", setAnimation);
 
-    Particle.function("next-frequency", nextFrequency);
-    Particle.function("previous-frequency", previousFrequency);
-
+    Particle.function("cycle-frequency", nextFrequency);
 
     Particle.function("set-color", setColor);
     Particle.function("set-hue", setHue);
     Particle.function("set-saturation", setSaturation);
     Particle.function("set-brightness", setBrightness);
-    Particle.function("set-sensitivy", setSensitivity);
+    Particle.function("set-sensitivity", setSensitivity);
 
     Particle.function("reset-device", resetDevice);
     Particle.function("enter-safe-mode", enterSafeMode);
@@ -129,6 +130,10 @@ int pause(String arg) {
     poweredOn = !poweredOn;
 
     return 1;
+}
+
+int toggleAudioReactive(String arg) {
+    return animations->toggleAudioReactive();
 }
 
 int nextAnimation(String arg) {
