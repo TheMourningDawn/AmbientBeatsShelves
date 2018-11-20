@@ -43,11 +43,10 @@ class LEDAnimations
     LEDAnimations();
     LEDAnimations(SpectrumEqualizer* eq);
 
-    int getCurrentAnimation();
-
     void setCurrentBrightness(int brightness);
     void setCurrentSaturation(int saturation);
 
+    int getCurrentAnimation();
     int runCurrentAnimation();
     int nextAnimation();
     int previousAnimation();
