@@ -1,7 +1,7 @@
 #include "application.h"
 #include "LEDAnimations.h"
-#include "SpectrumEqualizer.h"
-#include "ParticleCloudFunctions.h"
+#include "SpectrumEqualizerClient.h"
+#include "AmbientBeatsCloudFunctions.h"
 
 #define BORDER_LED_PIN    D2
 #define SHELF_LED_PIN    D3
@@ -9,9 +9,9 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
-SpectrumEqualizer *audioEqualizer;
+SpectrumEqualizerClient *audioEqualizer;
 LEDAnimations *animations;
-ParticleCloudFunctions *cloudFunctions;
+AmbientBeatsCloudFunctions *cloudFunctions;
 
 UDP udpMulticast;
 int udpPort = 47555;
@@ -28,9 +28,9 @@ int audioSensitivity = 0;
 void setup() {
     connectToRemote();
 
-    audioEqualizer = new SpectrumEqualizer();
+    audioEqualizer = new SpectrumEqualizerClient();
     animations = new LEDAnimations(audioEqualizer);
-    cloudFunctions = new ParticleCloudFunctions(animations);
+    cloudFunctions = new AmbientBeatsCloudFunctions(animations);
 
     cloudFunctions->setupCloudModeFunctions();
 

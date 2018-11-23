@@ -2,7 +2,7 @@
 #define LEDANIMATIONS_H
 
 #include "application.h"
-#include "SpectrumEqualizer.h"
+#include "SpectrumEqualizerClient.h"
 #include "FastLED.h"
 #include "Shelf.h"
 
@@ -25,7 +25,7 @@ FASTLED_USING_NAMESPACE;
 class LEDAnimations
 {
   private:
-    SpectrumEqualizer *equalizer;
+    SpectrumEqualizerClient *equalizer;
     Shelf *topShelf;
     Shelf *middleShelf;
     Shelf *bottomShelf;
@@ -41,7 +41,7 @@ class LEDAnimations
     int currentBrightness = 255;
 
     LEDAnimations();
-    LEDAnimations(SpectrumEqualizer* eq);
+    LEDAnimations(SpectrumEqualizerClient* eq);
 
     void setCurrentBrightness(int brightness);
     void setCurrentSaturation(int saturation);
