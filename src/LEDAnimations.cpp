@@ -12,7 +12,7 @@ Shelf *topShelf;
 Shelf *middleShelf;
 Shelf *bottomShelf;
 
-SpectrumEqualizer *equalizer;
+SpectrumEqualizerClient *equalizer;
 
 uint16_t globalSensitivity = 500;
 uint8_t frequencyMode[7] = {0, 1, 2, 3, 4, 5, 6};
@@ -35,14 +35,14 @@ AnimationList animationsRails[] = {&LEDAnimations::randomSilon, &LEDAnimations::
                                    &LEDAnimations::juggle, &LEDAnimations::rainbow, &LEDAnimations::waterfallBorderRemote,
                                    &LEDAnimations::waterfallRainbowBorder};
 
-LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizer()) {
+LEDAnimations::LEDAnimations() : equalizer(new SpectrumEqualizerClient()) {
     topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
     animationCount = ARRAY_SIZE(animationsMusicReactive) - 1;
 }
 
-LEDAnimations::LEDAnimations(SpectrumEqualizer *eq) : equalizer(eq) {
+LEDAnimations::LEDAnimations(SpectrumEqualizerClient *eq) : equalizer(eq) {
     topShelf = new Shelf(allShelves, TOP_SHELF_LEFT, TOP_SHELF_RIGHT);
     middleShelf = new Shelf(allShelves, MIDDLE_SHELF_LEFT, MIDDLE_SHELF_RIGHT);
     bottomShelf = new Shelf(allShelves, BOTTOM_SHELF_LEFT, BOTTOM_SHELF_RIGHT);
@@ -72,7 +72,7 @@ void LEDAnimations::randomSilon() {
         position = BOTTOM_SHELF_RIGHT;
         ledStripToUse = "shelf";
         direction = false;
-    } else if (position == BOTTOM_SHELF_LEFT && ledStripToUse == "border" && direction == false) {
+    } else if (position == BOTTOM_SHELF_LEFT && ledStripToUse == "border" && !direction) {
         position = -1;
         direction = true;
         ledStripToUse = "shelf";
@@ -100,11 +100,11 @@ void LEDAnimations::randomSilon() {
             direction = true;
             position = MIDDLE_SHELF_RIGHT;
         }
-    } else if (position == BOTTOM_SHELF_RIGHT && ledStripToUse == "shelf" && direction == true) {
+    } else if (position == BOTTOM_SHELF_RIGHT && ledStripToUse == "shelf" && direction) {
         position = NUM_BORDER_LEDS - 1;
         direction = false;
         ledStripToUse = "border";
-    } else if (position == MIDDLE_SHELF_RIGHT && ledStripToUse == "shelf" && direction == false) {
+    } else if (position == MIDDLE_SHELF_RIGHT && ledStripToUse == "shelf" && !direction) {
         if (random8(10) > 5) {
             ledStripToUse = "border";
             direction = true;
@@ -285,7 +285,7 @@ void LEDAnimations::confetti() {
 
 // eight colored dots, weaving in and out of sync with each other
 void LEDAnimations::juggle() {
-    int frequencyValue = equalizer->frequenciesLeft[frequencyMode[0]];
+    int frequencyValue = equalizer->frequenciesLeftChannel[frequencyMode[0]];
     uint16_t frequencyThreshold = clampSensitivity(globalSensitivity + 600);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 20);
@@ -307,7 +307,7 @@ void LEDAnimations::juggle() {
 int previousBrightness = 0;
 
 void LEDAnimations::colorBump() {
-    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], 500, 3800, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 500, 3800, 0, 255);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 5);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 5);
@@ -319,14 +319,14 @@ void LEDAnimations::colorBump() {
 }
 
 void LEDAnimations::flashyBump() {
-    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], 0, 3800, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 0, 3800, 0, 255);
 
     fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
     fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(currentHue, currentSaturation, thisBrightness));
 }
 
 void LEDAnimations::seizureCity() {
-    int thisBrightness = map(equalizer->frequenciesLeft[frequencyMode[6]], globalSensitivity, 3200, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], globalSensitivity, 3200, 0, 255);
     if (thisBrightness > 240) {
         currentHue += 20;
         wrapToRange(currentHue += 20, 0, 255);
@@ -344,10 +344,10 @@ void LEDAnimations::seizureCity() {
 void LEDAnimations::waterfall() {
     int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
     int brightness = 220;
-    waterfallShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+    waterfallShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+    waterfallShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallShelf(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness,
@@ -415,19 +415,19 @@ void LEDAnimations::waterfallBorderRemoteAndSpectrum(int frequencyValue, int fre
 void LEDAnimations::waterfallLeftToRight() {
     int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
     int brightness = 220;
-    waterfallShelfLeft(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelfLeft(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelfLeft(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelfLeft(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+    waterfallShelfLeft(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+    waterfallShelfLeft(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallRightToLeft() {
     int sensitivityValueMinThreshold = clampSensitivity(globalSensitivity + 700);
     int brightness = 220;
-    waterfallShelfRight(topShelf, equalizer->frequenciesLeft[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelfRight(middleShelf, equalizer->frequenciesLeft[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelfRight(bottomShelf, equalizer->frequenciesLeft[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeft[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelfRight(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
+    waterfallShelfRight(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
+    waterfallShelfRight(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
 }
 
 void LEDAnimations::waterfallBorderRemote() {
@@ -448,48 +448,48 @@ void LEDAnimations::waterfallRainbowBorder() {
 void LEDAnimations::equalizerLeftToRightBottomToTop() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 10);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 10);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerTopBorder(equalizer->frequenciesLeftChannel[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), true);
 }
 
 void LEDAnimations::equalizerRightToLeftBottomToTop() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerTopBorder(equalizer->frequenciesLeftChannel[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerRightToLeftTopToBottom() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerTopBorder(equalizer->frequenciesLeft[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), true);
-    equalizerShelf(topShelf, equalizer->frequenciesLeft[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeft[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeft[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerTopBorder(equalizer->frequenciesLeftChannel[frequencyMode[2]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), true);
+    equalizerShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[4]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[3]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerBorderOnly() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 40);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerBorderOnlyReversed() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 40);
-    equalizerLeftBorder(equalizer->frequenciesLeft[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeft[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(globalSensitivity + 400), false);
+    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(globalSensitivity + 400), false);
 }
 
 void LEDAnimations::equalizerLeftBorder(int frequencyValue, int sensitivityThreshold, bool direction) {

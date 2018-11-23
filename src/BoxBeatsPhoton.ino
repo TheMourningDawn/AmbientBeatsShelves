@@ -17,17 +17,9 @@ UDP udpMulticast;
 int udpPort = 47555;
 IPAddress udpIP(239,1,1,232);
 
-bool poweredOn = true;
-
-int hue = 200;
-int saturation = 0;
-int brightness = 0;
-int animation = 0;
-int audioSensitivity = 0;
 
 void setup() {
-    connectToRemote();
-
+//    connectToRemote();
     audioEqualizer = new SpectrumEqualizerClient();
     animations = new LEDAnimations(audioEqualizer);
     cloudFunctions = new AmbientBeatsCloudFunctions(animations);
@@ -39,9 +31,8 @@ void setup() {
   }
 
 void loop() {
-    if(poweredOn) {
+    if(animations->poweredOn) {
 //      readColorFromRemote();
-        readCurrentValues();
 
         animations->runCurrentAnimation();
         FastLED.show();
@@ -57,12 +48,4 @@ void readColorFromRemote() {
    if(udpMulticast.parsePacket() > 0) {
        animations->currentHue = udpMulticast.read() << 8 | udpMulticast.read();
    }
-}
-
-void readCurrentValues() {
-    hue = animations->currentHue;
-    saturation = animations->currentSaturation;
-    brightness = animations->currentBrightness;
-    animation = animations->currentAnimation;
-    audioSensitivity = animations->globalSensitivity;
 }

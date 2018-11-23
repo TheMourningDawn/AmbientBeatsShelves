@@ -32,7 +32,10 @@ class LEDAnimations
   public:
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
+
+    bool poweredOn = true;
     bool audioReactive = true;
+
     uint8_t animationCount;
     int globalSensitivity = 0;
     int currentAnimation = 0;
