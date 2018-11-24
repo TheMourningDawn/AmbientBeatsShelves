@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "SpectrumEqualizerClient.h"
+#include "AmbientBeatsLEDAnimations.h"
 #include "FastLED.h"
 #include "Shelf.h"
 
@@ -20,12 +21,9 @@ FASTLED_USING_NAMESPACE;
 #define TOP_SHELF_LEFT 40
 #define TOP_SHELF_RIGHT 59
 
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
-
-class LEDAnimations
+class LEDAnimations : public AmbientBeatsLEDAnimations
 {
   private:
-    SpectrumEqualizerClient *equalizer;
     Shelf *topShelf;
     Shelf *middleShelf;
     Shelf *bottomShelf;
@@ -33,39 +31,15 @@ class LEDAnimations
     CRGB borderLeds[NUM_BORDER_LEDS];
     CRGB allShelves[NUM_SHELF_LEDS];
 
-    bool poweredOn = true;
-    bool audioReactive = true;
-
-    uint8_t animationCount;
-    int globalSensitivity = 0;
-    int currentAnimation = 0;
-    int currentHue = 120;
-    int currentSaturation = 255;
-    int currentBrightness = 255;
-
-    LEDAnimations();
     LEDAnimations(SpectrumEqualizerClient* eq);
 
-    void setCurrentBrightness(int brightness);
-    void setCurrentSaturation(int saturation);
-
-    int getCurrentAnimation();
-    int runCurrentAnimation();
-    int nextAnimation();
-    int previousAnimation();
-    int setAnimation(int animationNumber);
-    int nextFrequencyMode();
-    int previousFrequencyMode();
+    int runAnimation();
     int toggleAudioReactive();
-
-    int clampToRange(int numberToClamp, int lowerBound, int upperBound);
-    int clampSensitivity(int sensitivity);
-    int wrapToRange(int numberToWrap, int lowerBound, int upperBound);
-
-    void randomSilon();
 
     void clearAllLeds();
     void fillColor();
+
+    void randomSilon();
     void rainbow();
     void confetti();
     void juggle();

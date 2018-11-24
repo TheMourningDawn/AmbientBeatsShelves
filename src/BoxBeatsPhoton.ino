@@ -28,24 +28,24 @@ void setup() {
 
     FastLED.addLeds<LED_TYPE, BORDER_LED_PIN, COLOR_ORDER>(animations->borderLeds, NUM_BORDER_LEDS).setCorrection(TypicalLEDStrip);
     FastLED.addLeds<LED_TYPE, SHELF_LED_PIN, COLOR_ORDER>(animations->allShelves, NUM_SHELF_LEDS).setCorrection(TypicalLEDStrip);
-  }
+}
 
 void loop() {
     if(animations->poweredOn) {
 //      readColorFromRemote();
 
-        animations->runCurrentAnimation();
+        animations->runAnimation();
         FastLED.show();
     }
 }
 
-void connectToRemote() {
-   udpMulticast.begin(udpPort);
-   udpMulticast.joinMulticast(udpIP);
-}
-
-void readColorFromRemote() {
-   if(udpMulticast.parsePacket() > 0) {
-       animations->currentHue = udpMulticast.read() << 8 | udpMulticast.read();
-   }
-}
+//void connectToRemote() {
+//   udpMulticast.begin(udpPort);
+//   udpMulticast.joinMulticast(udpIP);
+//}
+//
+//void readColorFromRemote() {
+//   if(udpMulticast.parsePacket() > 0) {
+//       animations->hue = udpMulticast.read() << 8 | udpMulticast.read();
+//   }
+//}
