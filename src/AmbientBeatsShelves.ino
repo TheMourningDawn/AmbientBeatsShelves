@@ -3,8 +3,8 @@
 #include "SpectrumEqualizerClient.h"
 #include "AmbientBeatsCloudFunctions.h"
 
-#define BORDER_LED_PIN    D2
-#define SHELF_LED_PIN    D3
+#define BORDER_LED_PIN    D5
+#define SHELF_LED_PIN    D6
 
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
