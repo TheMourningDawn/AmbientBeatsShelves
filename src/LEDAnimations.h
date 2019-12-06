@@ -50,7 +50,7 @@ class LEDAnimations : public AmbientBeatsLEDAnimations
 
     void waterfall();
     void waterfallCascading();
-    void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness);
+    void waterfallBorder(int frequencyValue, int sensitivityValueMinThreshold, int brightness, int baseColorOffset);
     void waterfallShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, int brightness, int baseColorOffset);
     void waterfallShelfRight(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);
     void waterfallShelfLeft(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset);

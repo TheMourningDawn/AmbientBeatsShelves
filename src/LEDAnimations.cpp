@@ -12,14 +12,14 @@ Shelf *bottomShelf;
 
 typedef void (LEDAnimations::*AnimationList)();
 
-AnimationList animationsAudioReactive[] = {&LEDAnimations::waterfall, &LEDAnimations::colorBump,
+AnimationList animationsAudioReactive[] = {&LEDAnimations::waterfall,
+                                           &LEDAnimations::colorBump,
                                            &LEDAnimations::seizureCity,
                                            &LEDAnimations::flashyBump,
                                            &LEDAnimations::waterfallLeftToRight,
                                            &LEDAnimations::waterfallRightToLeft,
                                            &LEDAnimations::equalizerLeftToRightBottomToTop,
                                            &LEDAnimations::equalizerRightToLeftBottomToTop,
-                                           &LEDAnimations::equalizerRightToLeftTopToBottom,
                                            &LEDAnimations::equalizerBorderOnly,
                                            &LEDAnimations::equalizerBorderOnlyReversed};
 
@@ -217,7 +217,7 @@ void LEDAnimations::juggle() {
 
 int previousBrightness = 0;
 void LEDAnimations::colorBump() {
-    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 500, 3800, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 0, 4096, 0, 255);
 
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 5);
     fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 5);
@@ -226,17 +226,18 @@ void LEDAnimations::colorBump() {
         fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(hue, saturation, thisBrightness));
         fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(hue, saturation, thisBrightness));
     }
+    previousBrightness = thisBrightness;
 }
 
 void LEDAnimations::flashyBump() {
-    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 0, 3800, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], 0, 4096, 0, 255);
 
     fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(hue, saturation, thisBrightness));
     fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(hue, saturation, thisBrightness));
 }
 
 void LEDAnimations::seizureCity() {
-    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivity, 3200, 0, 255);
+    int thisBrightness = map(equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivity, 4096, 0, 255);
     if (thisBrightness > 240) {
         hue += 20;
         wrapToRange(hue += 20, 0, 255);
@@ -249,15 +250,15 @@ void LEDAnimations::seizureCity() {
         fill_solid(borderLeds, NUM_BORDER_LEDS, CHSV(hue, saturation, thisBrightness));
         fill_solid(allShelves, NUM_SHELF_LEDS, CHSV(hue, saturation, thisBrightness));
     }
+
+    previousBrightness = thisBrightness;
 }
 
 void LEDAnimations::waterfall() {
-    int sensitivityValueMinThreshold = clampSensitivity(sensitivity + 700);
-    int brightness = 220;
-    waterfallShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivity, brightness, hue);
+    waterfallShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivity, brightness, hue);
+    waterfallShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivity, brightness, hue);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivity, brightness, hue);
 }
 
 void LEDAnimations::waterfallShelf(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness,
@@ -275,8 +276,7 @@ void LEDAnimations::waterfallShelf(Shelf *shelf, int frequencyValue, int frequen
     shelf->shiftMiddle();
 }
 
-void LEDAnimations::waterfallShelfLeft(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness,
-                                       int baseColorOffset) {
+void LEDAnimations::waterfallShelfLeft(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset) {
     if (frequencyValue > frequencyThreshold) {
         int mappedFrequencyValue = map(frequencyValue, frequencyThreshold, 4096, 0, 255);
         mappedFrequencyValue = (mappedFrequencyValue + baseColorOffset) % 255; //offsetting the base color...
@@ -287,8 +287,7 @@ void LEDAnimations::waterfallShelfLeft(Shelf *shelf, int frequencyValue, int fre
     shelf->shiftLeft();
 }
 
-void LEDAnimations::waterfallShelfRight(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness,
-                                        int baseColorOffset) {
+void LEDAnimations::waterfallShelfRight(Shelf *shelf, int frequencyValue, int frequencyThreshold, int brightness, int baseColorOffset) {
     if (frequencyValue > frequencyThreshold) {
         int mappedFrequencyValue = map(frequencyValue, frequencyThreshold, 4096, 0, 255);
         mappedFrequencyValue = (mappedFrequencyValue + baseColorOffset) % 255; //offsetting the base color...
@@ -299,21 +298,10 @@ void LEDAnimations::waterfallShelfRight(Shelf *shelf, int frequencyValue, int fr
     shelf->shiftRight();
 }
 
-void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyValueMinThreshold, int brightness) {
+void LEDAnimations::waterfallBorder(int frequencyValue, int frequencyValueMinThreshold, int brightness, int baseColorOffset) {
     if (frequencyValue > frequencyValueMinThreshold) {
         int mappedFrequencyValue = map(frequencyValue, frequencyValueMinThreshold, 4096, 0, 255);
-        mappedFrequencyValue = (mappedFrequencyValue + 120) % 255; //offsetting the base color...
-        borderLeds[NUM_BORDER_LEDS / 2] = CHSV(mappedFrequencyValue, saturation, brightness);
-    } else {
-        borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
-    }
-    memmove(&borderLeds[0], &borderLeds[1], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-    memmove(&borderLeds[NUM_BORDER_LEDS / 2 + 1], &borderLeds[NUM_BORDER_LEDS / 2], NUM_BORDER_LEDS / 2 * sizeof(CRGB));
-}
-
-void LEDAnimations::waterfallBorderRemoteAndSpectrum(int frequencyValue, int frequencyThreshold) {
-    if (frequencyValue > frequencyThreshold) {
-        int mappedFrequencyValue = hue;
+        mappedFrequencyValue = (mappedFrequencyValue + baseColorOffset) % 255; //offsetting the base color...
         borderLeds[NUM_BORDER_LEDS / 2] = CHSV(mappedFrequencyValue, saturation, brightness);
     } else {
         borderLeds[NUM_BORDER_LEDS / 2] = CRGB(0, 0, 0);
@@ -324,20 +312,18 @@ void LEDAnimations::waterfallBorderRemoteAndSpectrum(int frequencyValue, int fre
 
 void LEDAnimations::waterfallLeftToRight() {
     int sensitivityValueMinThreshold = clampSensitivity(sensitivity + 700);
-    int brightness = 220;
-    waterfallShelfLeft(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
-    waterfallShelfLeft(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
-    waterfallShelfLeft(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallShelfLeft(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, hue);
+    waterfallShelfLeft(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, hue);
+    waterfallShelfLeft(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, hue);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness, hue);
 }
 
 void LEDAnimations::waterfallRightToLeft() {
     int sensitivityValueMinThreshold = clampSensitivity(sensitivity + 700);
-    int brightness = 220;
     waterfallShelfRight(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[6]], sensitivityValueMinThreshold, brightness, 180);
     waterfallShelfRight(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[2]], sensitivityValueMinThreshold, brightness, 80);
     waterfallShelfRight(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[0]], sensitivityValueMinThreshold, brightness, 40);
-    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness);
+    waterfallBorder(equalizer->frequenciesLeftChannel[frequencyMode[4]], sensitivityValueMinThreshold, brightness, hue);
 }
 
 void LEDAnimations::waterfallBorderRemote() {
@@ -377,16 +363,18 @@ void LEDAnimations::equalizerRightToLeftBottomToTop() {
     equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(sensitivity + 400), false);
 }
 
-void LEDAnimations::equalizerRightToLeftTopToBottom() {
-    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
-    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
-    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(sensitivity + 400), true);
-    equalizerTopBorder(equalizer->frequenciesLeftChannel[frequencyMode[2]], clampSensitivity(sensitivity + 400), false);
-    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(sensitivity + 400), true);
-    equalizerShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[4]], clampSensitivity(sensitivity + 400), false);
-    equalizerShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[3]], clampSensitivity(sensitivity + 400), false);
-    equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(sensitivity + 400), false);
-}
+
+// TODO: This is broken. Falling off an array somewhere, I think.
+//void LEDAnimations::equalizerRightToLeftTopToBottom() {
+//    fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
+//    fadeToBlackBy(allShelves, NUM_SHELF_LEDS, 45);
+//    equalizerLeftBorder(equalizer->frequenciesLeftChannel[frequencyMode[0]], clampSensitivity(sensitivity + 400), true);
+//    equalizerTopBorder(equalizer->frequenciesLeftChannel[frequencyMode[2]], clampSensitivity(sensitivity + 400), false);
+//    equalizerRightBorder(equalizer->frequenciesLeftChannel[frequencyMode[6]], clampSensitivity(sensitivity + 400), true);
+//    equalizerShelf(topShelf, equalizer->frequenciesLeftChannel[frequencyMode[4]], clampSensitivity(sensitivity + 400), false);
+//    equalizerShelf(middleShelf, equalizer->frequenciesLeftChannel[frequencyMode[3]], clampSensitivity(sensitivity + 400), false);
+//    equalizerShelf(bottomShelf, equalizer->frequenciesLeftChannel[frequencyMode[5]], clampSensitivity(sensitivity + 400), false);
+//}
 
 void LEDAnimations::equalizerBorderOnly() {
     fadeToBlackBy(borderLeds, NUM_BORDER_LEDS, 40);
@@ -406,7 +394,9 @@ void LEDAnimations::equalizerLeftBorder(int frequencyValue, int sensitivityThres
     int ledsInSection = 62;
     if (frequencyValue > sensitivityThreshold) {
         int numberToLight = map(frequencyValue, 0, 3500, 0, ledsInSection);
-        CRGB color = CHSV(map(frequencyValue, sensitivityThreshold, 4096, 0, 255), saturation, brightness);
+        int mappedFrequencyValue = map(frequencyValue, sensitivityThreshold, 4096, 0, 255);
+        mappedFrequencyValue = (mappedFrequencyValue + hue) % 255; //offsetting the base color...
+        CRGB color = CHSV(mappedFrequencyValue, saturation, brightness);
         if (direction) {
             for (int i = ledsInSection - numberToLight; i < ledsInSection; i++) {
                 borderLeds[i] = color;
@@ -424,7 +414,9 @@ void LEDAnimations::equalizerRightBorder(int frequencyValue, int sensitivityThre
     int locationOffset = 84;
     if (frequencyValue > sensitivityThreshold) {
         int numberToLight = map(frequencyValue, sensitivityThreshold, 3500, 0, ledsInSection);
-        CRGB color = CHSV(map(frequencyValue, sensitivityThreshold, 4096, 0, 255), saturation, brightness);
+        int mappedFrequencyValue = map(frequencyValue, sensitivityThreshold, 4096, 0, 255);
+        mappedFrequencyValue = (mappedFrequencyValue + hue) % 255; //offsetting the base color...
+        CRGB color = CHSV(mappedFrequencyValue, saturation, brightness);
         if (direction) {
             for (int i = locationOffset; i < locationOffset + numberToLight; i++) {
                 borderLeds[i] = color;
@@ -445,7 +437,9 @@ void LEDAnimations::equalizerTopBorder(int frequencyValue, int sensitivityThresh
     }
     if (frequencyValue > sensitivityThreshold) {
         int numberToLight = map(frequencyValue, sensitivityThreshold, 3500, 0, ledsInSection);
-        CRGB color = CHSV(map(frequencyValue, sensitivityThreshold, 4096, 0, 255), saturation, brightness);
+        int mappedFrequencyValue = map(frequencyValue, sensitivityThreshold, 4096, 0, 255);
+        mappedFrequencyValue = (mappedFrequencyValue + hue) % 255; //offsetting the base color...
+        CRGB color = CHSV(mappedFrequencyValue, saturation, brightness);
         if (direction) {
             for (int i = locationOffset; i < locationOffset + numberToLight; i++) {
                 borderLeds[i] = color;
@@ -461,7 +455,9 @@ void LEDAnimations::equalizerTopBorder(int frequencyValue, int sensitivityThresh
 void LEDAnimations::equalizerShelf(Shelf *shelf, int frequencyValue, int sensitivityThreshold, bool direction) {
     if (frequencyValue > sensitivityThreshold) {
         int numberToLight = map(frequencyValue, sensitivityThreshold, 3500, 0, LEDS_PER_SHELF);
-        CRGB color = CHSV(map(frequencyValue, sensitivityThreshold, 4096, 0, 255), saturation, brightness);
+        int mappedFrequencyValue = map(frequencyValue, sensitivityThreshold, 4096, 0, 255);
+        mappedFrequencyValue = (mappedFrequencyValue + hue) % 255; //offsetting the base color...
+        CRGB color = CHSV(mappedFrequencyValue, saturation, brightness);
         if (direction) {
             shelf->fillLeft(color, numberToLight);
         } else {
