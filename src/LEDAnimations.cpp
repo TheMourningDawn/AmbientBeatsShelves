@@ -36,8 +36,10 @@ LEDAnimations::LEDAnimations(SpectrumEqualizerClient *eq) : AmbientBeatsLEDAnima
 }
 
 int LEDAnimations::runAnimation() {
-    equalizer->readAudioFrequencies();
+    delay(speed);
+    this->runColorLoop();
     if (audioReactiveOn) {
+        equalizer->readAudioFrequencies();
         (this->*animationsAudioReactive[animation])();
     } else {
         (this->*animationsRails[animation])();
@@ -151,6 +153,7 @@ int LEDAnimations::toggleAudioReactive() {
 
     if (audioReactiveOn) {
         animationCount = ARRAY_SIZE(animationsAudioReactive) - 1;
+        colorLoopOn = false;
     } else {
         animationCount = ARRAY_SIZE(animationsRails) - 1;
     }
